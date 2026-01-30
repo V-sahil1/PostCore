@@ -22,16 +22,16 @@ export const register = async (
   res: Response
 ): Promise<Response> => {
   try {
-    const { Username, email, password, role } = req.body;
+    const { user_name, email, password, role } = req.body;
 
-    if (!Username || !email || !password) {
+    if (!user_name || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const hash = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      Username,
+      user_name,
       email,
       password: hash,
       role,

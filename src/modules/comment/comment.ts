@@ -11,6 +11,8 @@ const commentModel = (sequelize:Sequelize)=>{
         
 
 
+    },{
+        underscored:true
     })
     return comment;
 
