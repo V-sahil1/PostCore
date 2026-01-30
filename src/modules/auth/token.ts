@@ -1,12 +1,14 @@
 import { type Sequelize,DataTypes } from "sequelize";
 const tokenModel = (sequelize:Sequelize)=>{
     const comment = sequelize.define('token',{
-        TokenValue:{
+        token_value:{
             type :DataTypes.STRING
         },
     
 
 
+    },{
+        underscored:true    
     })
     return comment;
 

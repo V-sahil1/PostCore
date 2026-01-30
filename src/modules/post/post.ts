@@ -19,7 +19,9 @@ const PostModel = (sequelize: Sequelize) => {
 
      
     },
-    {}
+    {
+      underscored:true
+    }
   );
 
   return user;

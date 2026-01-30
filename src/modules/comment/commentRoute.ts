@@ -24,7 +24,7 @@
       const { postId } = req.params;
 
       if (!description) {
-        return res.status(400).json({ message: "Title is required" });
+        return res.status(400).json({ message: "description is required" });
       }
 
       const comment = await Comment.create({

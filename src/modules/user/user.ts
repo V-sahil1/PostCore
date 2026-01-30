@@ -4,7 +4,7 @@ const UserModel = (sequelize: Sequelize) => {
   const user = sequelize.define(
     "user",
     {
-      Username: {
+      user_name: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
@@ -30,7 +30,7 @@ const UserModel = (sequelize: Sequelize) => {
      
 
     },
-    {}
+    {underscored:true}
   );
 
   return user;
