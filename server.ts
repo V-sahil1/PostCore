@@ -9,7 +9,7 @@ import  { creatpost } from "./src/modules/post/postRoute";
 import { authenticateJWT } from "./src/middleware/jwt";
 import { comment } from "./src/modules/comment/commentRoute";
 import { saveToken } from "./src/modules/auth/tokenRoute";
-import { deletecomment, getcomment, getpost, postDelete, UpdateComment, updatePost,userDelete } from "./src/controller/route";
+import { deletecomment, getcomment, getpost, postDelete, UpdateComment, updatePost,userDelete,getpostById } from "./src/controller/route";
 import validate from "./src/middleware/validateSchema";
 import { createSchema } from "./src/joi/joi";
 import { optionalJWT } from "./src/middleware/optinal";
@@ -61,8 +61,13 @@ app.post('/comment/:postId',optionalJWT,comment)
 // access token save
 app.post('/token',saveToken)
 
-// get Post
-app.get('/getpost',getpost  )
+// get Post All post
+app.get('/getpostAll',getpost)
+
+//get post
+app.get('/getpost/:pid',getpostById)
+
+
 
 //Get comment
 app.get('/getcomment',getcomment   )

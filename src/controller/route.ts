@@ -23,7 +23,7 @@ export const getpost = async (req: Request, res: Response): Promise<Response> =>
             {
                 model: User,
                 as: "UserInfo",
-                attributes: ["Username", "email"]
+                attributes: ["user_name", "email"]
             },
             {
                 model: Comment,
@@ -56,7 +56,7 @@ export const getcomment = async (req: Request, res: Response): Promise<Response>
         //     {
         //         model: User,
         //         // 👈 alias required
-        //         attributes: ["Username"],
+        //         attributes: ["user_name"],
         //     },
         // ],
 
@@ -73,6 +73,7 @@ export const deletecomment = async (req: Request, res: Response): Promise<Respon
         }
         const id = Number(req.params.delId);
         const AuthComment =await Comment.findByPk(id);
+
         if(!AuthComment){
             return res.status(500).json({message:"Comment is not Found"})
         }
@@ -139,7 +140,7 @@ export const postDelete = async (req: Request, res: Response): Promise<Response>
         }
         const authPostRow = AuthComment as unknown as PostRow;
         // && User.role !== "admin"
-        if(authPostRow.user_id !== user.id && user.role !== "admin" ){
+        if(authPostRow.user_id !== user.id  ){
              return res.status(500).json({message:"You are Not authorized to delete the Comment"})
         }
         const comment= await Comment.findAll({
@@ -260,6 +261,29 @@ export const userDelete = async(req:Request,res:Response):Promise<Response>=>{
     } catch (error: unknown) {
          return res.status(500).json({message:errorMessage(error)});  
     }
+}
+
+
+export const getpostById = async (req: Request, res: Response): Promise<Response> => {
+    try {
+         const id = Number(req.params.pid);
+           console.log(id);
+    const data = await Post.findByPk(id)
+    console.log(data);
+    
+
+    if(!data){
+        return res.status(404).json({message:"Post is Not Found"});
+
+    }
+    return res.status(200).json(data);
+        
+    } catch (error: unknown) {
+         return res.status(500).json({message:errorMessage(error)});  
+    }
+   
+
+
 }
 
 
