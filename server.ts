@@ -38,55 +38,55 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-///-------------------------------------------------------------------Route-------------------------------------------------------------------------------------------
+///==============================================================>   Route <======================================================= 
 
-// user route
+// ----------------------------------------------------------------user route
 app.post("/register",validate(createSchema), register);
 
-// app.post("/post", post);
+//------------------------------------------------------------ app.post("/post", post);
 app.post(
   "/login",
   passport.authenticate("local"),login
 );
 
-//post route
+//---------------------------------------------------------------------post route
 app.post('/createpost' ,authenticateJWT,creatpost);
 app.get("/", (_req: Request, res: Response) => {
   res.send("Server is running");
 });
 
-//comment route
+//--------------------------------------------------------------------comment route
 app.post('/comment/:postId',optionalJWT,comment)
 
-// access token save
+// -----------------------------------------------------------------access token save
 app.post('/token',saveToken)
 
-// get Post All post
+// -----------------------------------------------------------------get Post All post
 app.get('/getpostAll',getpost)
 
-//get post
+//-------------------------------------------------------------------get post
 app.get('/getpost/:pid',getpostById)
 
 
 
-//Get comment
+//------------------------------------------------------------------Get comment
 app.get('/getcomment',getcomment   )
 
 
-//update Comment
+//------------------------------------------------------------------update Comment
 app.patch('/updateComment/:commentId',authenticateJWT,UpdateComment)
 
-//updatePost
+//--------------------------------------------------------------------updatePost
 app.patch('/updatepost/:upId',authenticateJWT,updatePost)
 
 
-//Delete Comment
+//--------------------------------------------------------------------Delete Comment
 app.delete('/delete/:delId',authenticateJWT,deletecomment)
 
-//Delete Post
+//--------------------------------------------------------------------Delete Post
 app.delete('/deletePost/:delId',authenticateJWT,postDelete)
 
-//Delete user
+//-----------------------------------------------------------------------Delete user
 app.delete('/deleteUser/:userId',authenticateJWT,userDelete)
 
 
