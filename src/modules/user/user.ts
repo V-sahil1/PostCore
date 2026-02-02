@@ -27,6 +27,13 @@ const UserModel = (sequelize: Sequelize) => {
         allowNull: false,
         defaultValue: "user"
       },
+        age: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 10
+      },
+    
+   
      
 
     },

@@ -4,7 +4,12 @@ import postmodel from '../modules/post/post';
 import commentmodel from '../modules/comment/comment';
 import tokenModel from '../modules/auth/token';
 
-const sequelize = new Sequelize('task', 'root', 'rootroot', {
+const SQL_DATABASE = String(process.env.SQL_DATABASE);
+const SQL_NAME = String(process.env.SQL_NAME);
+  const SQL_PASSWORD = String(process.env.SQL_PASSWORD);
+
+
+const sequelize = new Sequelize(SQL_DATABASE, SQL_NAME, SQL_PASSWORD, {
     host: 'localhost',
     dialect: 'mysql',
     pool: {
@@ -69,7 +74,7 @@ db.comment.belongsTo(db.post,{foreignKey  : "post_id"})
 
 
     // db.sequelize.sync({
-    //     force:true
+    //     alter:true
     // })
 
 export default db;
