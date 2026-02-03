@@ -1,15 +1,18 @@
 import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
-     username:{
-        type:String,
-        
-    },
-    error:{
-        type:String,
-        
-
-    }
-},{
+  method: String,
+  url: String,
+  status: Number,
+  responseTime: Number,
+  ip: String,
+  userAgent: String,
+  message:String,
+  time: {
+    type: Date,
+    default: Date.now
+  }
+}
+,{
     
 });
-module.exports = mongoose.model("Error",userSchema)
+export default mongoose.model("Error",userSchema)
