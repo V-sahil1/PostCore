@@ -7,7 +7,12 @@ const tsconfigRootDir = path.resolve(".");
 
 export default defineConfig([
   {
-    ignores: ["dist/**", "**/dist/**"],
+    ignores: ["dist/**", "**/dist/**",
+  "src/migrations/**",
+      "src/seeders/**",
+      "**/migrations/**",
+      "**/seeders/**",
+],
   },
   {
     files: ["**/*.{ts,tsx,js,jsx}"],

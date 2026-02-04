@@ -4,14 +4,14 @@
   "description": "",
   "main": "server.ts",
   "scripts": {
-    "dev": "nodemon --exec ts-node --project tsconfig.json server.ts",
-    "build": "npm run lint && tsc",
-    "start": "node dist/server.js",
-    "lint": "eslint . --ext .ts",
-    "seed:i": "npx sequelize-cli db:seed:all",
-    "seed:d": "npx sequelize-cli db:seed:undo:all",
-    "seed:i:file": "npx sequelize-cli db:seed --seed",
-    "seed:d:file": "npx sequelize-cli db:seed:undo --seed"
+"dev": "nodemon --exec ts-node --project tsconfig.json src/server.ts",
+  "build": "npm run lint && tsc",
+  "start": "node dist/src/server.js",
+  "lint": "eslint . --ext .ts",
+  "seed:i": "npx sequelize-cli db:seed:all",
+  "seed:d": "npx sequelize-cli db:seed:undo:all",
+  "seed:i:file": "npx sequelize-cli db:seed --seed",
+  "seed:d:file": "npx sequelize-cli db:seed:undo --seed"
   },
   "keywords": [],
   "author": "",

@@ -148,7 +148,7 @@ export const postDelete = async (req: Request, res: Response): Promise<Response>
                 post_id:id
             }
         })
-       const arr = comment.map((item) => (item as unknown as IdRow).id);
+       const arr = comment.map((item : number) => (item as unknown as IdRow).id);
         await Comment.destroy({
             where:{
                 id:arr
@@ -222,7 +222,7 @@ export const userDelete = async(req:Request,res:Response):Promise<Response>=>{
             }
         })
         
-        const arr = comment.map((item) => (item as unknown as IdRow).id);
+        const arr = comment.map((item:number) => (item as unknown as IdRow).id);
         await Comment.destroy({
             where:{
                 id:arr
@@ -234,7 +234,7 @@ export const userDelete = async(req:Request,res:Response):Promise<Response>=>{
                 user_id:id
             }
         })
-        const arr1 = post.map((item) => (item as unknown as IdRow).id);
+        const arr1 = post.map((item:number) => (item as unknown as IdRow).id);
         await Post.destroy({
             where:{
                 id:arr1

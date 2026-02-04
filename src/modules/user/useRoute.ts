@@ -9,11 +9,12 @@ config();
 /* ✅ Sequelize model (correct reference) */
 const User = db.user;
 
+const JWT_SECRET = process.env.JWT_SECRET;
 /* 🔐 JWT secret check */
-if (!process.env.JWT_SECRET) {
+if (!JWT_SECRET) {
   throw new Error("JWT_SECRET is not defined in .env file");
 }
-const JWT_SECRET = process.env.JWT_SECRET;
+
 // const JWT_EXPIRE = process.env.JWT_EXPIRE
 
 /* ================= REGISTER ================= */
@@ -22,7 +23,7 @@ export const register = async (
   res: Response
 ): Promise<Response> => {
   try {
-    const { user_name, email, password, role } = req.body;
+    const { user_name, email, password, role,age } = req.body;
 
     if (!user_name || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
@@ -35,11 +36,12 @@ export const register = async (
       email,
       password: hash,
       role,
+      age
     });
-    const createdUser = user as unknown as { id: number; email: string; role: string };
+    const createdUser = user as unknown as { id: number; user_name:string; email: string; role: string; age:string };
 
      const token = jwt.sign(
-      { id: createdUser.id, email: createdUser.email, role: createdUser.role },
+      { id: createdUser.id, user_name: createdUser.user_name, email: createdUser.email, role: createdUser.role,age:createdUser.age },
       JWT_SECRET,
       { expiresIn:'1d'}
     );
@@ -49,8 +51,10 @@ export const register = async (
       token,
       user: {
         id: createdUser.id,
+        user_name: createdUser.user_name,
         email: createdUser.email,
         role: createdUser.role,
+        age:createdUser.age,
       },
     });
   } catch (error: unknown) {

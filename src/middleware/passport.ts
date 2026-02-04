@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
-import db from "./sql";
+import db from "../config/sql";
 
 const User = db.user;
 // Define a User type based on your database model
