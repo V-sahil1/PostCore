@@ -1,12 +1,27 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 import fs from "fs";
 import path from "path";
-import { Sequelize, DataTypes, Model } from "sequelize";
+import { Sequelize, DataTypes } from "sequelize";
 import process from "process";
+import { config } from "../config/sql";
+
+type Env = "development" | "test" | "production";
+
+const env: Env = (process.env.NODE_ENV || "development") as Env;
+const sequelizeConfig = config[env];
+console.log(sequelizeConfig);
+
+if (!sequelizeConfig) {
+  throw new Error(`Missing database configuration for env: ${env}`);
+}
 
 const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || "development";
-const config = require(path.join(__dirname, "../config/config.json"))[env];
+console.log(basename);
+console.log(__filename);
+
+
 
 interface DB {
   [key: string]: any;
@@ -14,36 +29,57 @@ interface DB {
   Sequelize: typeof Sequelize;
 }
 
-const db: DB = {} as DB;
+const db = {} as DB;
 
-let sequelize: Sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable]!, config);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
-
+/**
+ * Create Sequelize instance
+ */
+const sequelize = new Sequelize(
+ 
+  
+  sequelizeConfig.database,
+  sequelizeConfig.username,
+  sequelizeConfig.password,
+  {
+    host: sequelizeConfig.host,
+    dialect: 'mysql',
+    logging: false,
+  }
+);
+ console.log(sequelizeConfig.database);
+/**
+ * Load models
+ */
 fs.readdirSync(__dirname)
-  .filter((file) => {
-    return (
-      file.indexOf(".") !== 0 &&
+  .filter(
+    (file) =>
       file !== basename &&
-      (file.slice(-3) === ".ts" || file.slice(-3) === ".js") &&
-      file.indexOf(".test.") === -1
-    );
-  })
+      (file.endsWith(".ts") || file.endsWith(".js")) &&
+      !file.includes(".test.")
+  )
   .forEach((file) => {
-    const model = require(path.join(__dirname, file)).default(sequelize, DataTypes);
+    const model = require(path.join(__dirname, file)).default(
+      sequelize,
+      DataTypes
+    );
     db[model.name] = model;
   });
 
+/**
+ * Associations
+ */
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
   }
 });
+console.log(Object.keys(db));
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
+
+    // db.sequelize.sync({
+    //     force:true
+    // })
 
 export default db;

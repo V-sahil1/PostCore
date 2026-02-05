@@ -15,7 +15,7 @@ import passport from "./middleware/passport";
 // import { optionalJWT } from "./middleware/optinal";
 import morganMiddleware from "./middleware/morganLogger";
 import { captureResponse } from "./middleware/responseCapture";
-import router from "./controller";
+import router from "./modules/index";
 
 
 const app: Application = express();
@@ -44,7 +44,7 @@ app.get("/", (_req: Request, res: Response) => {
   res.send("Server is running");
 });
 
-app.use('/',router)
+app.use("/",router)
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

@@ -1,4 +1,4 @@
-import db from "../../config/sql";
+import db from "../../models/index";
 import type { Request, Response } from "express";
 
 const Token = db.token;

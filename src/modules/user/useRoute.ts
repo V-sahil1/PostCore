@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import db from "../../config/sql";
+import db from "../../models/index";
 import { config } from "dotenv";
 import jwt from "jsonwebtoken";
 import type { Request, Response } from "express";

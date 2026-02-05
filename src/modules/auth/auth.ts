@@ -1,5 +1,5 @@
 // import bcrypt from "bcrypt";
-// import db from "../../config/sql";
+// import db from "../../models/index";
 
 // import type { Request,Response } from "express";
 // const User = db.user;

@@ -3,13 +3,53 @@ import { Sequelize } from 'sequelize';
 // import postmodel from '../models/post';
 // import commentmodel from '../models/comment';
 // import tokenModel from '../modules/auth/token';
-import db from '../models';
+// import db from '../models/index';
+import { ENV,env } from './env';
 
 const SQL_DATABASE = String(process.env.SQL_DATABASE);
 const SQL_NAME = String(process.env.SQL_NAME);
 const SQL_PASSWORD = String(process.env.SQL_PASSWORD);
 const SQL_HOST = String(process.env.SQL_HOST);
 
+// type Env = 'development' | 'test' | 'production';
+// const env = (process.env.NODE_ENV || 'development') as Env;
+import { Env } from "./env";
+
+type DBConfig = {
+  username: string;
+  password: string;
+  database: string;
+  host: string;
+  dialect: "mysql";
+};
+
+
+export const config= {
+[ENV]: {
+    username: env.DB.USER,
+    password: env.DB.PASSWORD,
+    database: env.DB.NAME,
+    host: env.DB.HOST,
+    dialect: "mysql",
+  }
+
+}as Record<Env, DBConfig>;
+
+
+//  export const config= {
+//   [env]: {
+//     "username": SQL_NAME,
+//     "password":SQL_PASSWORD,
+//     "database": SQL_DATABASE,
+//     "host": SQL_HOST ,
+//     "dialect": "mysql"
+//   }
+
+
+// }
+
+
+// console.log(config[env]?.username);
 
 
 const sequelize = new Sequelize(SQL_DATABASE, SQL_NAME, SQL_PASSWORD, {
@@ -53,8 +93,5 @@ const sequelize = new Sequelize(SQL_DATABASE, SQL_NAME, SQL_PASSWORD, {
 // db.comment.belongsTo(db.post,{foreignKey  : "post_id"})
 
 
-    // db.sequelize.sync({
-    //     force:true
-    // })
 
-export default db;
+// export default db;
