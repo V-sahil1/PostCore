@@ -1,9 +1,8 @@
 import { Router } from "express";
-import { getpost, getpostById, postDelete, updatePost } from "../../controller/route";
-import { authenticateJWT } from "../../middleware/jwt";
-import { creatpost } from "./postRoute";
-import { createpostSchema } from "../../joi/joi";
-import validate from "../../middleware/validateSchema";
+import { creatpost, getpost, getpostById, postDelete, updatePost } from "../controller/post.controller";
+import { authenticateJWT } from "../middleware/jwt";
+import { createpostSchema } from "../validator/joi";
+import validate from "../middleware/validateSchema";
 
 const router = Router();
 

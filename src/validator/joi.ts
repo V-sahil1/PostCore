@@ -35,5 +35,10 @@ export const updatepostSchema = Joi.object({
     
 
 })
+export const deleteComment = Joi.object({
+    userId:Joi.string().required()
+
+
+})
 
 

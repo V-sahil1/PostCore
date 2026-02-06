@@ -2,11 +2,11 @@
   import type { Application, Request, Response } from "express";
   import session from "express-session";
   import connectDB from "./config/mongo";
-  import db from "./models";
+  import db from "./database/models";
   import passport from "./middleware/passport";
   import morganMiddleware from "./middleware/morganLogger";
   import { captureResponse } from "./middleware/responseCapture";
-  import router from "./modules/index";
+  import router from "./route/index.route";
   import swaggerUi from  "swagger-ui-express";
   import swaggerDocument from "./swagger-output.json"
   const app: Application = express();

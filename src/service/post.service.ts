@@ -1,0 +1,108 @@
+import db from "../database/models";
+
+const Post = db.post;
+const User = db.user;
+const Comment = db.comment;
+
+type AuthUser = { id: number; role?: string };
+type IdRow = { id: number };
+type PostRow = { user_id: number };
+
+/* ================= CREATE POST ================= */
+export const createPostService = async (
+  title: string,
+  user: AuthUser
+) => {
+  if (!title) {
+    throw new Error("Title is required");
+  }
+
+  const post = await Post.create({
+    title,
+    user_id: user.id,
+  });
+
+  return {
+    message: "Post created successfully",
+    post,
+  };
+};
+
+/* ================= UPDATE POST ================= */
+export const updatePostService = async (
+  postId: number,
+  title: string,
+  user: AuthUser
+) => {
+  const post = await Post.findByPk(postId);
+  if (!post) {
+    throw new Error("Post not found");
+  }
+
+  const postRow = post as unknown as PostRow;
+
+  if (postRow.user_id !== user.id && user.role !== "admin") {
+    throw new Error("Not authorized to update post");
+  }
+
+  await post.update({ title });
+  return post;
+};
+
+/* ================= GET ALL POSTS ================= */
+export const getAllPostsService = async () => {
+  return await Post.findAll({
+    attributes: ["title"],
+    include: [
+      {
+        model: User,
+        as: "UserInfo",
+        attributes: ["user_name", "email"],
+      },
+      {
+        model: Comment,
+      },
+    ],
+  });
+};
+
+/* ================= GET POST BY ID ================= */
+export const getPostByIdService = async (id: number) => {
+  const post = await Post.findByPk(id);
+  if (!post) {
+    throw new Error("Post not found");
+  }
+  return post;
+};
+
+/* ================= DELETE POST ================= */
+export const deletePostService = async (
+  postId: number,
+  user: AuthUser
+) => {
+  const post = await Post.findByPk(postId);
+  if (!post) {
+    throw new Error("Post not found");
+  }
+
+  const postRow = post as unknown as PostRow;
+
+  if (postRow.user_id !== user.id) {
+    throw new Error("Not authorized to delete post");
+  }
+
+  const comments = await Comment.findAll({
+    where: { post_id: postId },
+  });
+
+  const commentIds = comments.map(
+    (item:number) => (item as unknown as IdRow).id
+  );
+
+  if (commentIds.length > 0) {
+    await Comment.destroy({ where: { id: commentIds } });
+  }
+
+  await post.destroy();
+  return { message: "Post deleted successfully" };
+};

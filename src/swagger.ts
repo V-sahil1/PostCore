@@ -6,6 +6,12 @@ import swaggerAutogen from 'swagger-autogen';
     description: 'Description'
 
   },
+  tags: [
+    { name: "User", description: "User related APIs" },
+    { name: "Post", description: "Post related APIs" },
+    { name: "Comment", description: "Comment related APIs" },
+    { name: "Auth", description: "Authentication APIs" }
+  ],
   host: 'localhost:5000'
 };
 const outputFile = './swagger-output.json';

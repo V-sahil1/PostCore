@@ -5,12 +5,12 @@ import fs from "fs";
 import path from "path";
 import { Sequelize, DataTypes } from "sequelize";
 import process from "process";
-import { config } from "../config/sql";
+import { configs } from "../../config/sql";
 
 type Env = "development" | "test" | "production";
 
 const env: Env = (process.env.NODE_ENV || "development") as Env;
-const sequelizeConfig = config[env];
+const sequelizeConfig = configs[env];
 console.log(sequelizeConfig);
 
 if (!sequelizeConfig) {
@@ -47,9 +47,9 @@ const sequelize = new Sequelize(
   }
 );
  console.log(sequelizeConfig.database);
-/**
- * Load models
- */
+
+  //Load models
+
 fs.readdirSync(__dirname)
   .filter(
     (file) =>
@@ -65,9 +65,7 @@ fs.readdirSync(__dirname)
     db[model.name] = model;
   });
 
-/**
- * Associations
- */
+//Associations
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db);

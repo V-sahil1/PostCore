@@ -1,19 +1,5 @@
 import { Sequelize } from 'sequelize';
-// import usermodel from '../models/user';
-// import postmodel from '../models/post';
-// import commentmodel from '../models/comment';
-// import tokenModel from '../modules/auth/token';
-// import db from '../models/index';
-import { ENV,env } from './env';
-
-const SQL_DATABASE = String(process.env.SQL_DATABASE);
-const SQL_NAME = String(process.env.SQL_NAME);
-const SQL_PASSWORD = String(process.env.SQL_PASSWORD);
-const SQL_HOST = String(process.env.SQL_HOST);
-
-// type Env = 'development' | 'test' | 'production';
-// const env = (process.env.NODE_ENV || 'development') as Env;
-import { Env } from "./env";
+import { ENV, env, Env } from './env.config';
 
 type DBConfig = {
   username: string;
@@ -23,9 +9,8 @@ type DBConfig = {
   dialect: "mysql";
 };
 
-
-export const config= {
-[ENV]: {
+export const configs = {
+  [ENV]: {
     username: env.DB.USER,
     password: env.DB.PASSWORD,
     database: env.DB.NAME,
@@ -33,34 +18,18 @@ export const config= {
     dialect: "mysql",
   }
 
-}as Record<Env, DBConfig>;
+} as Record<Env, DBConfig>;
 
 
-//  export const config= {
-//   [env]: {
-//     "username": SQL_NAME,
-//     "password":SQL_PASSWORD,
-//     "database": SQL_DATABASE,
-//     "host": SQL_HOST ,
-//     "dialect": "mysql"
-//   }
-
-
-// }
-
-
-// console.log(config[env]?.username);
-
-
-const sequelize = new Sequelize(SQL_DATABASE, SQL_NAME, SQL_PASSWORD, {
-    host: SQL_HOST,
-    dialect: 'mysql',
-    pool: {
-        max: 5,
-        min: 0,
-        idle: 10000
-    },
-    logging: false
+ export const sequelize = new Sequelize(env.DB.NAME, env.DB.USER, env.DB.PASSWORD, {
+  host: env.DB.HOST,
+  dialect: 'mysql',
+  pool: {
+    max: 5,
+    min: 0,
+    idle: 10000
+  },
+  logging: false
 });
 
 (async () => {
@@ -76,6 +45,20 @@ const sequelize = new Sequelize(SQL_DATABASE, SQL_NAME, SQL_PASSWORD, {
 
 
 
+
+
+
+
+
+
+
+// const SQL_DATABASE = String(process.env.SQL_DATABASE);
+// const SQL_NAME = String(process.env.SQL_NAME);
+// const SQL_PASSWORD = String(process.env.SQL_PASSWORD);
+// const SQL_HOST = String(process.env.SQL_HOST);
+
+// type Env = 'development' | 'test' | 'production';
+// const env = (process.env.NODE_ENV || 'development') as Env;
 // One to Many
 // db.user.hasMany(db.post, { foreignKey: "user_id", as: "postDetails" });
 // db.post.belongsTo(db.user, { foreignKey: "user_id", as: "UserInfo" });
