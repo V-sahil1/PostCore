@@ -6,15 +6,15 @@ const userSchema = new mongoose.Schema({
   responseTime: Number,
   ip: String,
   userAgent: String,
-  message:String,
+  message: String,
   time: {
     type: Date,
     default: Date.now
   }
 }
-,{
-    
-});
-export default mongoose.model("Error",userSchema)
+  , {
+
+  });
+export default mongoose.model("Error", userSchema)
 
 //change

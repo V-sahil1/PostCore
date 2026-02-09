@@ -6,15 +6,14 @@ import validate from "../middleware/validateSchema";
 
 const router = Router();
 
+router.get('/get', getpost)
 
-router.get('/getpostAll', getpost)
-
-router.post('/createpost', authenticateJWT,validate(createpostSchema), creatpost);
+router.post('/post', authenticateJWT, validate(createpostSchema), creatpost);
 //-------------------------------------------------------------------get post
-router.get('/getpost/:pid', getpostById)
+router.get('/get-post/:pid', getpostById)
 
-router.patch('/updatepost/:upId', authenticateJWT, updatePost)
+router.patch('/update-post/:upId', authenticateJWT, updatePost)
 
-router.delete('/deletePost/:delId', authenticateJWT, postDelete)
+router.delete('/delete-post/:delId', authenticateJWT, postDelete)
 
 export default router;

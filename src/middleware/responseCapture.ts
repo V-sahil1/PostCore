@@ -7,10 +7,10 @@ export const captureResponse = (
 ) => {
   const oldJson = res.json;
 
-// console.log(res.locals.responseBody);
+  // console.log(res.locals.responseBody);
 
   res.locals.responseBody = null;
-//   console.log(res.locals.responseBody);
+  //   console.log(res.locals.responseBody);
 
   res.json = function (body: string) {
     res.locals.responseBody = body;

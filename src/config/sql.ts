@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import { ENV, env, Env } from './env.config';
+import { env, Env } from './env.config';
 
 type DBConfig = {
   username: string;
@@ -10,7 +10,7 @@ type DBConfig = {
 };
 
 export const configs = {
-  [ENV]: {
+  [env.NODE_ENV]: {
     username: env.DB.USER,
     password: env.DB.PASSWORD,
     database: env.DB.NAME,
@@ -20,8 +20,7 @@ export const configs = {
 
 } as Record<Env, DBConfig>;
 
-
- export const sequelize = new Sequelize(env.DB.NAME, env.DB.USER, env.DB.PASSWORD, {
+export const sequelize = new Sequelize(env.DB.NAME, env.DB.USER, env.DB.PASSWORD, {
   host: env.DB.HOST,
   dialect: 'mysql',
   pool: {
@@ -31,26 +30,6 @@ export const configs = {
   },
   logging: false
 });
-
-(async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
-  } catch (error: unknown) {
-    console.error('Unable to connect to the database:', error);
-  }
-})();
-
-
-
-
-
-
-
-
-
-
-
 
 // const SQL_DATABASE = String(process.env.SQL_DATABASE);
 // const SQL_NAME = String(process.env.SQL_NAME);
@@ -74,7 +53,5 @@ export const configs = {
 // One To Many
 // db.post.hasMany(db.comment,{foreignKey  : "post_id"   });
 // db.comment.belongsTo(db.post,{foreignKey  : "post_id"})
-
-
 
 // export default db;

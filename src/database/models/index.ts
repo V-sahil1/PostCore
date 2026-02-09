@@ -4,13 +4,10 @@
 import fs from "fs";
 import path from "path";
 import { Sequelize, DataTypes } from "sequelize";
-import process from "process";
 import { configs } from "../../config/sql";
+import { env } from "../../config/env.config";
 
-type Env = "development" | "test" | "production";
-
-const env: Env = (process.env.NODE_ENV || "development") as Env;
-const sequelizeConfig = configs[env];
+const sequelizeConfig = configs[env.NODE_ENV];
 console.log(sequelizeConfig);
 
 if (!sequelizeConfig) {
@@ -20,8 +17,6 @@ if (!sequelizeConfig) {
 const basename = path.basename(__filename);
 console.log(basename);
 console.log(__filename);
-
-
 
 interface DB {
   [key: string]: any;
@@ -35,8 +30,7 @@ const db = {} as DB;
  * Create Sequelize instance
  */
 const sequelize = new Sequelize(
- 
-  
+
   sequelizeConfig.database,
   sequelizeConfig.username,
   sequelizeConfig.password,

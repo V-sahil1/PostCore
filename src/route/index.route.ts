@@ -2,20 +2,22 @@ import { Router } from "express";
 import userRouer from './user-router'
 import postRouer from './post-router'
 import commentRouer from './comment-router'
-import { saveToken } from "../controller/token.controller";
-
-
+// import { saveToken } from "../controller/token.controller";
+import tokenRouer from './token-router'
 
 const route = Router();
 
-route.use('/user',userRouer);
+route.use('/user'/*
+    #swagger.tags = ['User']*/, userRouer);
 route.use('/post'
-   ,postRouer);
-route.use('/comment',commentRouer);
-route.use('/token',saveToken);
-
+    /*
+    #swagger.tags = ['Post']*/, postRouer);
+route.use('/comment'
+   /*
+    #swagger.tags = ['Comment']*/ , commentRouer);
+route.use('/token'
+    /*
+  #swagger.tags = ['Auth']*/
+    , tokenRouer);
 
 export default route
-
-
-

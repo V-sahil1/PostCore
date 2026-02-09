@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
+import { env } from "../config/env.config";
 
 type AuthUser = {
   id: number;
@@ -17,15 +18,15 @@ export const optionalJWT = (
   if (authHeader && /^Bearer\s+/i.test(authHeader)) {
     try {
       const token = authHeader.split(" ")[1];
-      
-  if (!token || typeof token !== 'string') {
-    return;
-  }
-      if (!process.env.JWT_SECRET) {
+
+      if (!token || typeof token !== 'string') {
+        return;
+      }
+      if (!env.DB.JWT_SECRET) {
         req.user = undefined;
         return next();
       }
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, env.DB.JWT_SECRET);
       if (typeof decoded === "string") {
         req.user = undefined;
         return next();

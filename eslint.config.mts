@@ -30,6 +30,17 @@ export default defineConfig([
     ],
     rules: {
       "no-console": "warn",
+        "no-multiple-empty-lines": [
+      "error",
+      {
+        "max": 1,
+        "maxEOF": 0,
+        "maxBOF": 0
+      }
+    ],
+
+    "no-trailing-spaces": "error",
+    "no-irregular-whitespace": "error",
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },

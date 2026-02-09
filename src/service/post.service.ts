@@ -1,3 +1,4 @@
+import { MESSAGES } from "../const/message";
 import db from "../database/models";
 
 const Post = db.post;
@@ -14,7 +15,8 @@ export const createPostService = async (
   user: AuthUser
 ) => {
   if (!title) {
-    throw new Error("Title is required");
+    // throw new Error("Title is required");
+    throw new Error(MESSAGES.REQUIRED);
   }
 
   const post = await Post.create({
@@ -23,7 +25,8 @@ export const createPostService = async (
   });
 
   return {
-    message: "Post created successfully",
+    // message: "Post created successfully",
+    message: MESSAGES.POST_SUCCESS,
     post,
   };
 };
@@ -36,13 +39,15 @@ export const updatePostService = async (
 ) => {
   const post = await Post.findByPk(postId);
   if (!post) {
-    throw new Error("Post not found");
+    // throw new Error("Post not found");
+    throw new Error(MESSAGES.POST_NOT_FOUND);
   }
 
   const postRow = post as unknown as PostRow;
 
   if (postRow.user_id !== user.id && user.role !== "admin") {
-    throw new Error("Not authorized to update post");
+    // throw new Error("Not authorized to update post");
+    throw new Error(MESSAGES.UNAUTHORIZED);
   }
 
   await post.update({ title });
@@ -70,7 +75,7 @@ export const getAllPostsService = async () => {
 export const getPostByIdService = async (id: number) => {
   const post = await Post.findByPk(id);
   if (!post) {
-    throw new Error("Post not found");
+    throw new Error(MESSAGES.POST_NOT_FOUND);
   }
   return post;
 };
@@ -82,13 +87,13 @@ export const deletePostService = async (
 ) => {
   const post = await Post.findByPk(postId);
   if (!post) {
-    throw new Error("Post not found");
+    throw new Error(MESSAGES.POST_NOT_FOUND);
   }
 
   const postRow = post as unknown as PostRow;
 
   if (postRow.user_id !== user.id) {
-    throw new Error("Not authorized to delete post");
+    throw new Error(MESSAGES.UNAUTHORIZED);
   }
 
   const comments = await Comment.findAll({
@@ -96,7 +101,7 @@ export const deletePostService = async (
   });
 
   const commentIds = comments.map(
-    (item:number) => (item as unknown as IdRow).id
+    (item: number) => (item as unknown as IdRow).id
   );
 
   if (commentIds.length > 0) {
@@ -104,5 +109,5 @@ export const deletePostService = async (
   }
 
   await post.destroy();
-  return { message: "Post deleted successfully" };
+  return { message: MESSAGES.POST_DELETED_SUCCESSFULLY };
 };

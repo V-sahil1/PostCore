@@ -1,8 +1,9 @@
 import type { Request, Response } from "express";
 import * as commentService from "../service/comment.service";
+import { MESSAGES } from "../const/message";
 
 type AuthUser = { id: number; role?: string };
-function errorMessage(error: unknown): string { return error instanceof Error ? error.message : "Internal Server Error"; }
+function errorMessage(error: unknown): string { return error instanceof Error ? error.message : MESSAGES.INTERNAL_SERVER_ERROR; }
 
 /* ================= GET COMMENTS ================= */
 export const getcomment = async (
@@ -30,7 +31,7 @@ export const comment = async (
     );
 
     return res.status(201).json(result);
-  } catch (error: unknown) { return res.status(500).json({message:errorMessage(error)}); }
+  } catch (error: unknown) { return res.status(500).json({ message: errorMessage(error) }); }
 };
 
 /* ================= DELETE COMMENT ================= */
@@ -41,13 +42,13 @@ export const deletecomment = async (
   try {
     const user = req.user as AuthUser;
     if (!user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: MESSAGES.UNAUTHORIZED });
     }
 
     const id = Number(req.params.delId);
     const result = await commentService.deleteCommentService(id, user);
     return res.status(200).json(result);
-  }catch (error: unknown) { return res.status(500).json({message:errorMessage(error)}); }
+  } catch (error: unknown) { return res.status(500).json({ message: errorMessage(error) }); }
 };
 
 /* ================= UPDATE COMMENT ================= */
@@ -58,7 +59,7 @@ export const UpdateComment = async (
   try {
     const user = req.user as AuthUser;
     if (!user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: MESSAGES.UNAUTHORIZED });
     }
 
     const id = Number(req.params.commentId);
@@ -71,5 +72,5 @@ export const UpdateComment = async (
     );
 
     return res.status(200).json(data);
-  }catch (error: unknown) { return res.status(500).json({message:errorMessage(error)}); }
+  } catch (error: unknown) { return res.status(500).json({ message: errorMessage(error) }); }
 };

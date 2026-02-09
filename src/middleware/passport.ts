@@ -2,6 +2,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
 import db from "../database/models";
+import { MESSAGES } from "../const/message";
 
 const User = db.user;
 
@@ -17,19 +18,18 @@ passport.use(
   new LocalStrategy(
     { usernameField: "email" },
 
-
     async (email, password, done) => {
       try {
         const user = await User.findOne({ where: { email } });
 
         if (!user) {
-          return done(null, false, { message: "User not found" });
+          return done(null, false, { message: MESSAGES.USER_NOT_FOUND });
         }
 
         const userInstance = user as unknown as UserInstance;
         const isMatch = await bcrypt.compare(password, userInstance.password);
         if (!isMatch) {
-          return done(null, false, { message: "Invalid password" });
+          return done(null, false, { message: MESSAGES.INVALID_CREDENTIALS });
         }
 
         return done(null, user);

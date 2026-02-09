@@ -1,3 +1,4 @@
+import { MESSAGES } from "../const/message";
 import db from "../database/models";
 
 const Comment = db.comment;
@@ -17,7 +18,7 @@ export const createCommentService = async (
   user?: AuthUser
 ) => {
   if (!description) {
-    throw new Error("Description is required");
+    throw new Error(MESSAGES.REQUIRED);
   }
 
   const comment = await Comment.create({
@@ -28,7 +29,7 @@ export const createCommentService = async (
   });
 
   return {
-    message: "Comment created successfully",
+    message: MESSAGES.COMMENT_CREATE_SUCCESSFULLY,
     comment,
   };
 };
@@ -40,7 +41,7 @@ export const deleteCommentService = async (
 ) => {
   const comment = await Comment.findByPk(commentId);
   if (!comment) {
-    throw new Error("Comment not found");
+    throw new Error(MESSAGES.REQUIRED);
   }
 
   const commentRow = comment as unknown as CommentRow;
@@ -50,7 +51,7 @@ export const deleteCommentService = async (
   }
 
   await comment.destroy();
-  return { message: "Comment deleted successfully" };
+  return { message: MESSAGES.COMMENT_DELETED_SUCCESSFULLY };
 };
 
 /* ================= UPDATE COMMENT ================= */
@@ -60,18 +61,20 @@ export const updateCommentService = async (
   user: AuthUser
 ) => {
   if (!description) {
-    throw new Error("Comment is required");
+    // throw new Error("Comment is required");
+    throw new Error(MESSAGES.REQUIRED);
   }
 
   const comment = await Comment.findByPk(commentId);
   if (!comment) {
-    throw new Error("Comment not found");
+    throw new Error(MESSAGES.COMMENT_NOT_FOUND);
   }
 
   const commentRow = comment as unknown as CommentRow;
 
   if (commentRow.user_id !== user.id && user.role !== "admin") {
-    throw new Error("Not authorized to update comment");
+    // throw new Error("Not authorized to update comment");
+    throw new Error(MESSAGES.UNAUTHORIZED);
   }
 
   await comment.update({ description });
