@@ -1,7 +1,8 @@
-import { MESSAGES } from "../const/message";
+import { MESSAGES, operationCreate, operationDelete, oprationNoteFound, oprationRequired } from "../const/message";
 import db from "../database/models";
 
 const Comment = db.comment;
+const Post = db.post;
 
 type AuthUser = { id: number; role?: string };
 type CommentRow = { user_id: number };
@@ -18,8 +19,12 @@ export const createCommentService = async (
   user?: AuthUser
 ) => {
   if (!description) {
-    throw new Error(MESSAGES.REQUIRED);
+    throw new Error(oprationRequired("Description"));
   }
+ const post = await Post.findByPk(postId);
+ if(!post){
+   throw new Error(oprationNoteFound("Post"));
+ }
 
   const comment = await Comment.create({
     description,
@@ -29,7 +34,7 @@ export const createCommentService = async (
   });
 
   return {
-    message: MESSAGES.COMMENT_CREATE_SUCCESSFULLY,
+    message: operationCreate("Comment"),
     comment,
   };
 };
@@ -41,17 +46,17 @@ export const deleteCommentService = async (
 ) => {
   const comment = await Comment.findByPk(commentId);
   if (!comment) {
-    throw new Error(MESSAGES.REQUIRED);
+    throw new Error(oprationRequired("Comment"));
   }
 
   const commentRow = comment as unknown as CommentRow;
 
   if (commentRow.user_id !== user.id && user.role !== "admin") {
-    throw new Error("Not authorized to delete comment");
+    throw new Error(MESSAGES.FORBIDDEN);
   }
 
   await comment.destroy();
-  return { message: MESSAGES.COMMENT_DELETED_SUCCESSFULLY };
+  return { message: operationDelete("Comment")};
 };
 
 /* ================= UPDATE COMMENT ================= */
@@ -62,12 +67,12 @@ export const updateCommentService = async (
 ) => {
   if (!description) {
     // throw new Error("Comment is required");
-    throw new Error(MESSAGES.REQUIRED);
+    throw new Error(oprationRequired("Description"));
   }
 
   const comment = await Comment.findByPk(commentId);
   if (!comment) {
-    throw new Error(MESSAGES.COMMENT_NOT_FOUND);
+    throw new Error(oprationNoteFound("Comment"));
   }
 
   const commentRow = comment as unknown as CommentRow;

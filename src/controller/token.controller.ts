@@ -1,8 +1,10 @@
 import type { Request, Response } from "express";
 import * as tokenService from "../service/token.service";
-import { MESSAGES } from "../const/message";
+import { errorMessage, MESSAGES } from "../const/message";
+import { senderror, sendSuccess } from "../utils/response.util";
 
-/* ================= SAVE TOKEN ================= */
+// ---------------------------------------- SAVE TOKEN  ----------------------------------------------
+
 export const saveToken = async (
   req: Request,
   res: Response
@@ -11,16 +13,31 @@ export const saveToken = async (
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      return res.status(401).json({ message: MESSAGES.TOKEN_MISSING });
+      return sendSuccess(
+        res,
+        401,
+        MESSAGES.TOKEN_MISSING
+      )
+      //  res.status(401).json({ message: MESSAGES.TOKEN_MISSING });
     }
 
     const accessToken = authHeader.split(" ")[1];
 
     const result = await tokenService.saveTokenService(String(accessToken));
-    return res.status(201).json(result);
+    // console.log(result);
+    return sendSuccess(
+      res,
+      201,
+      MESSAGES.SAVED,
+      result
+    )
+    //  res.status(201).json(result);
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : MESSAGES.INTERNAL_SERVER_ERROR;
-    return res.status(500).json({ message });
+
+    return senderror(
+      res,
+      500,
+      errorMessage(error)
+    )
   }
 };

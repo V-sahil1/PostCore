@@ -22,11 +22,11 @@ export const optionalJWT = (
       if (!token || typeof token !== 'string') {
         return;
       }
-      if (!env.DB.JWT_SECRET) {
+      if (!env.JWT.JWT_SECRET) {
         req.user = undefined;
         return next();
       }
-      const decoded = jwt.verify(token, env.DB.JWT_SECRET);
+      const decoded = jwt.verify(token, env.JWT.JWT_SECRET);
       if (typeof decoded === "string") {
         req.user = undefined;
         return next();

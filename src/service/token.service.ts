@@ -14,7 +14,6 @@ export const saveTokenService = async (accessToken: string) => {
   });
 
   return {
-    message: MESSAGES.SAVED,
     savedToken,
   };
 };

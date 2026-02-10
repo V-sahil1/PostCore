@@ -5,21 +5,11 @@ export const MESSAGES = {
     INVALID_CREDENTIALS: "Invalid email or password",
     UNAUTHORIZED: "Unauthorized access",
     FORBIDDEN: "You are not allowed to perform this action",
-    USER_DELETED_SUCCESSFULLY: "User deleted successfully",
-    POST_DELETED_SUCCESSFULLY: "Post deleted successfully",
-    COMMENT_DELETED_SUCCESSFULLY: "Comment deleted successfully",
-
-    POST_NOT_FOUND: "Post not found",
-    POST_SUCCESS: "Post created successfully",
-
-    COMMENT_NOT_FOUND: "Comment not found",
-    COMMENT_CREATE_SUCCESSFULLY: "Comment Create successfully",
 
     SOMETHING_WENT_WRONG: "Something went wrong",
     INTERNAL_SERVER_ERROR: "Internal server error",
 
     LOGIN_SUCCESS: "Login successful",
-    REGISTER_SUCCESS: "User registered successfully",
     REQUIRED: "All fields are required",
 
     TOKEN_NOT_DEFINE: "JWT_SECRET is not defined in .env",
@@ -28,14 +18,29 @@ export const MESSAGES = {
     VALIDATION_ERROR: "Validation error",
     BAD_REQUEST: "Bad Request",
 
-    ENV_MISSING: "Missing environment variable"
+    ENV_MISSING: "Missing environment variable",
+    SUCCESS: "Successfull"
 
 };
 
-export const  oprationRequired = (opration:string)=>{
+export const oprationRequired = (operation: string): string => {
+    return `${operation} Required`;
+};
 
-    return{
-        message:`${opration} required`
+export const operationDelete = (operation: string): string => {
+    return `${operation} Deleted Successfully`;
+};
+export const operationCreate = (operation: string): string => {
+    return `${operation} Create Successfully`;
+};
 
-    }
+export const oprationUpdate = (opration: string):string => {
+
+    return `${opration} Update Successfully`
 }
+export const oprationNoteFound = (opration: string):string => {
+
+    return`${opration} Not Found`
+}
+
+export function errorMessage(error: unknown): string { return error instanceof Error ? error.message : MESSAGES.INTERNAL_SERVER_ERROR; }

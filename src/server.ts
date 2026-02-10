@@ -1,30 +1,16 @@
 import express from "express";
 import type { Application, Request, Response } from "express";
 import session from "express-session";
-import connectDB from "./config/mongo";
-import db from "./database/models";
 import passport from "./middleware/passport";
 import morganMiddleware from "./middleware/morganLogger";
 import { captureResponse } from "./middleware/responseCapture";
 import router from "./route/index.route";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "./swagger-output.json"
-import { mongoConnect, sqlConnect } from "./config/db.connect";
+import {  startserver } from "./config/db.connect";
 import { env } from "./config/env.config";
 
 const app: Application = express();
-const PORT = Number(env.DB.PORT);
-
-const startserver = async () => {
-  connectDB();
-  const _db = db;
-  void _db;
-  await sqlConnect();
-  await mongoConnect();
-  app.listen(PORT, () => {
-    console.log(`Server is  running on http://localhost:${PORT}`);
-  });
-}
 
 startserver();
 
@@ -37,7 +23,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(
   session({
-    secret: String(env.DB.SESSION_SECRET),
+    secret: String(env.SESSION.SESSION_SECRET),
     resave: false,
     saveUninitialized: false,
   })

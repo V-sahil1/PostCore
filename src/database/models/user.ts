@@ -1,4 +1,5 @@
 import { DataTypes, type Sequelize, Model, ModelStatic } from "sequelize";
+import{ USER_ROLES, type UserRole} from "../../const/user-role";
 
 type ModelWithAssociate = ModelStatic<Model> & {
   associate: (models: Record<string, ModelStatic<Model>>) => void;
@@ -9,7 +10,7 @@ const UserModel = (sequelize: Sequelize): ModelWithAssociate => {
     declare user_name: string;
     declare email: string;
     declare password: string;
-    declare role: "admin" | "user";
+    declare role: UserRole;
     declare age: number;
 
     // Add static associate method with null check
@@ -50,7 +51,7 @@ const UserModel = (sequelize: Sequelize): ModelWithAssociate => {
         allowNull: false,
       },
       role: {
-        type: DataTypes.ENUM("admin", "user"),
+        type: DataTypes.ENUM(...Object.values(USER_ROLES)),
         allowNull: false,
         defaultValue: "user"
       },

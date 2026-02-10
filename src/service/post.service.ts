@@ -1,4 +1,4 @@
-import { MESSAGES } from "../const/message";
+import { MESSAGES, operationCreate, operationDelete, oprationNoteFound } from "../const/message";
 import db from "../database/models";
 
 const Post = db.post;
@@ -26,7 +26,7 @@ export const createPostService = async (
 
   return {
     // message: "Post created successfully",
-    message: MESSAGES.POST_SUCCESS,
+    message: operationCreate("Post"),
     post,
   };
 };
@@ -40,7 +40,7 @@ export const updatePostService = async (
   const post = await Post.findByPk(postId);
   if (!post) {
     // throw new Error("Post not found");
-    throw new Error(MESSAGES.POST_NOT_FOUND);
+    throw new Error(oprationNoteFound("Post"));
   }
 
   const postRow = post as unknown as PostRow;
@@ -75,7 +75,7 @@ export const getAllPostsService = async () => {
 export const getPostByIdService = async (id: number) => {
   const post = await Post.findByPk(id);
   if (!post) {
-    throw new Error(MESSAGES.POST_NOT_FOUND);
+    throw new Error(oprationNoteFound("Post"));
   }
   return post;
 };
@@ -87,7 +87,7 @@ export const deletePostService = async (
 ) => {
   const post = await Post.findByPk(postId);
   if (!post) {
-    throw new Error(MESSAGES.POST_NOT_FOUND);
+    throw new Error(oprationNoteFound("Post"));
   }
 
   const postRow = post as unknown as PostRow;
@@ -109,5 +109,5 @@ export const deletePostService = async (
   }
 
   await post.destroy();
-  return { message: MESSAGES.POST_DELETED_SUCCESSFULLY };
+  return { message: operationDelete("Post")};
 };

@@ -1,13 +1,13 @@
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import * as userService from "../service/user.service";
-import { MESSAGES } from "../const/message";
+import { errorMessage, MESSAGES, operationCreate, operationDelete, oprationUpdate } from "../const/message";
 import { env } from "../config/env.config";
-
-function errorMessage(error: unknown): string { return error instanceof Error ? error.message : MESSAGES.INTERNAL_SERVER_ERROR; }
+import { UserRole } from "../const/user-role";
+import { senderror, sendSuccess } from "../utils/response.util";
 
 // ---------------------------------------- JWT ----------------------------------------------
-const JWT_SECRET = env.DB.JWT_SECRET;
+const JWT_SECRET = env.JWT.JWT_SECRET;
 if (!JWT_SECRET) {
   throw new Error(MESSAGES.TOKEN_NOT_DEFINE);
 }
@@ -15,7 +15,7 @@ if (!JWT_SECRET) {
 // ----------------------------------------TYPES ----------------------------------------------
 type AuthUser = {
   id: number;
-  role?: string;
+  role?: UserRole;
   email?: string;
 };
 
@@ -46,15 +46,24 @@ export const register = async (
       { expiresIn: "1d" }
     );
 
-    return res.status(201).json({
-      message: result.message,
-      token,
-      user: result.user,
-    });
+    // console.log(result.message);
+    // console.log( MESSAGES.REGISTER_SUCCESS);
+
+    return sendSuccess(
+      res,
+      200,
+      operationCreate("User"),
+      result.user,
+      token
+    );
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : MESSAGES.BAD_REQUEST;
-    return res.status(400).json({ message });
+    // const message =
+    //   error instanceof Error ? error.message : MESSAGES.BAD_REQUEST;
+    return senderror(
+      res,
+      404,
+      errorMessage(error)
+    )
   }
 };
 
@@ -78,16 +87,27 @@ export const login = async (
       JWT_SECRET,
       { expiresIn: "1d" }
     );
-
-    return res.status(200).json({
-      message: result.message,
-      token,
-      user: result.user,
-    });
+    //  console.log(result.user);
+    return sendSuccess(
+      res,
+      200,
+      MESSAGES.LOGIN_SUCCESS,
+      result.user,
+      token
+    );
+    //  res.status(200).json({
+    //       message: result.message,
+    //       token,
+    //       user: result.user,
+    //     });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : MESSAGES.UNAUTHORIZED;
-    return res.status(401).json({ message });
+    // const message =
+    //   error instanceof Error ? error.message : MESSAGES.UNAUTHORIZED;
+   return senderror(
+      res,
+      401,
+      errorMessage(error)
+    )
   }
 };
 
@@ -102,14 +122,23 @@ export const deleteUser = async (
     const userId = Number(req.params.userId);
 
     const result = await userService.deleteUserService(userId, authUser);
+    // console.log(res);
 
-    return res.status(200).json(result);
+    return sendSuccess(
+      res,
+      200,
+      operationDelete("User"),
+      result
+
+    );
+    // res.status(200).json(result);
   } catch (error: unknown) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : MESSAGES.INTERNAL_SERVER_ERROR;
-    return res.status(500).json({ message });
+
+     return senderror(
+      res,
+      500,
+      errorMessage(error)
+    )
   }
 };
 
@@ -121,13 +150,23 @@ export const getUser = async (
 ): Promise<Response> => {
   try {
     const result = await userService.getAllUserService();
-    return res.status(200).json(result);
+    return   sendSuccess(
+      res,
+      200,
+      result
+
+    );
+    // res.status(200).json(result);
   } catch (error: unknown) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : MESSAGES.INTERNAL_SERVER_ERROR;
-    return res.status(500).json({ message });
+    // const message =
+    //   error instanceof Error
+    //     ? error.message
+    //     : MESSAGES.INTERNAL_SERVER_ERROR;
+   return senderror(
+      res,
+      500,
+      errorMessage(error)
+    )
   }
 };
 
@@ -138,15 +177,30 @@ export const updateUser = async (
   res: Response
 ): Promise<Response> => {
   try {
-    const user = req.user as AuthUser;
-    if (!user) {
-      return res.status(401).json({ message: MESSAGES.UNAUTHORIZED });
+    const authUser = req.user as AuthUser;
+    if (!authUser) {
+     return senderror(
+      res,
+      500,
+      MESSAGES.UNAUTHORIZED
+    )
     }
 
     const id = Number(req.params.userId);
-    const { user_name,email,password,role,age } = req.body;
+    const { user_name, email, password, role, age } = req.body;
 
-    const data = await userService.updateUserService(id, user_name,email,password,role,age);
-    return res.status(200).json(data);
-  } catch (error: unknown) { return res.status(500).json({ message: errorMessage(error) }); }
+    const data = await userService.updateUserService(id,authUser, user_name, email, password, role, age);
+    return sendSuccess(
+      res,
+      200,
+     oprationUpdate("User"),
+      data
+
+    );
+    // res.status(200).json(data);
+  } catch (error: unknown) { return senderror(
+      res,
+      500,
+      errorMessage(error)
+    ) }
 };

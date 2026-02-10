@@ -1,6 +1,7 @@
 import db from "../database/models";
 import bcrypt from "bcrypt";
-import { MESSAGES } from "../const/message";
+import { MESSAGES, operationCreate, operationDelete, oprationNoteFound } from "../const/message";
+import { USER_ROLES, UserRole } from "../const/user-role";
 
 const User = db.user;
 const Post = db.post;
@@ -8,7 +9,7 @@ const Comment = db.comment;
 
 type AuthUser = {
   id: number;
-  role?: string;
+  role?: UserRole;
 };
 
 type IdRow = { id: number };
@@ -57,7 +58,7 @@ export const deleteUserService = async (
 
   await User.destroy({ where: { id: targetUserId } });
 
-  return { message: MESSAGES.USER_DELETED_SUCCESSFULLY };
+  return { message: operationDelete("User")};
 };
 
 /* ================= REGISTER ================= */
@@ -91,7 +92,7 @@ export const registerUserService = async (
   };
 
   return {
-    message: MESSAGES.REGISTER_SUCCESS,
+    message: operationCreate("User"),
     user: {
       id: createdUser.id,
       user_name: createdUser.user_name,
@@ -143,21 +144,20 @@ export const getAllUserService = async () => {
 };
 export const updateUserService = async (
   userId: number,
+  authUser:AuthUser,
   user_name:string,
   email:string,
   password:string,
-  role:string,
+  role:UserRole,
   age:string
 ) => {
   const user = await User.findByPk(userId);
   if (!user) {
     // throw new Error("Post not found");
-    throw new Error(MESSAGES.POST_NOT_FOUND);
+    throw new Error(oprationNoteFound("User"));
   }
 
-  const userRow = user ;
-
-  if (userRow.id !== user.id ) {
+  if (authUser.id !== user.id && authUser.role !== USER_ROLES.ADMIN) {
     // throw new Error("Not authorized to update post");
     throw new Error(MESSAGES.UNAUTHORIZED);
   }

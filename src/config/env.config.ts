@@ -5,7 +5,7 @@ export type Env = "development" | "test" | "production";
 
 const processEnv = process.env;
 
-function getrequiredenv(name: string): string {
+function getEnvValue(name: string): string {
   const value = processEnv[name];
   if (!value) {
     throw new Error(`${MESSAGES.ENV_MISSING}: ${name}`);
@@ -17,15 +17,28 @@ export const env = {
   NODE_ENV: (processEnv.NODE_ENV as Env) || "development",
 
   DB: {
-    NAME: getrequiredenv("SQL_DATABASE"),
-    USER: getrequiredenv("SQL_NAME"),
-    PASSWORD: getrequiredenv("SQL_PASSWORD"),
-    HOST: getrequiredenv("SQL_HOST"),
-    JWT_EXPIRE: getrequiredenv("JWT_EXPIRE"),
-    JWT_SECRET: getrequiredenv("JWT_SECRET"),
-    MONGO_URI: getrequiredenv("MONGO_URI"),
-    SESSION_SECRET:getrequiredenv("SESSION_SECRET"),
-    PORT:getrequiredenv("PORT"),
+    NAME: getEnvValue("SQL_DATABASE"),
+    USER: getEnvValue("SQL_NAME"),
+    PASSWORD: getEnvValue("SQL_PASSWORD"),
+    HOST: getEnvValue("SQL_HOST")
+  },
+
+  JWT: {
+    JWT_EXPIRE: getEnvValue("JWT_EXPIRE"),
+    JWT_SECRET: getEnvValue("JWT_SECRET"),
 
   },
+  MONGO: {
+    MONGO_URI: getEnvValue("MONGO_URI"),
+  },
+  SESSION: {
+
+    SESSION_SECRET: getEnvValue("SESSION_SECRET"),
+
+  },
+  SERVER: {
+    PORT: getEnvValue("PORT"),
+
+  }
+
 };

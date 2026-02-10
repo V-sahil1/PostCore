@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
 import * as commentService from "../service/comment.service";
-import { MESSAGES } from "../const/message";
+import { errorMessage, MESSAGES, operationCreate, operationDelete, oprationUpdate } from "../const/message";
+import { senderror, sendSuccess } from "../utils/response.util";
 
 type AuthUser = { id: number; role?: string };
-function errorMessage(error: unknown): string { return error instanceof Error ? error.message : MESSAGES.INTERNAL_SERVER_ERROR; }
 
 /* ================= GET COMMENTS ================= */
 export const getcomment = async (
@@ -11,7 +11,13 @@ export const getcomment = async (
   res: Response
 ): Promise<Response> => {
   const data = await commentService.getAllCommentsService();
-  return res.status(200).json(data);
+  return sendSuccess(
+    res,
+    200,
+    MESSAGES.SUCCESS,
+    data
+
+  )
 };
 
 /* ================= CREATE COMMENT ================= */
@@ -30,8 +36,22 @@ export const comment = async (
       user
     );
 
-    return res.status(201).json(result);
-  } catch (error: unknown) { return res.status(500).json({ message: errorMessage(error) }); }
+    return sendSuccess(
+      res,
+      200,
+      operationCreate("Comment"),
+      result
+
+    )
+  } catch (error: unknown) {
+    return senderror(
+      res,
+      500,
+      errorMessage(error)
+
+    )
+    // res.status(500).json({ message: errorMessage(error) });
+  }
 };
 
 /* ================= DELETE COMMENT ================= */
@@ -42,13 +62,29 @@ export const deletecomment = async (
   try {
     const user = req.user as AuthUser;
     if (!user) {
-      return res.status(401).json({ message: MESSAGES.UNAUTHORIZED });
+      return senderror(
+      res,
+      500,
+     MESSAGES.UNAUTHORIZED
+
+    )
     }
 
     const id = Number(req.params.delId);
     const result = await commentService.deleteCommentService(id, user);
-    return res.status(200).json(result);
-  } catch (error: unknown) { return res.status(500).json({ message: errorMessage(error) }); }
+    return sendSuccess(
+      res,
+      200,
+      operationDelete("Comoment"),
+      result
+
+    )
+  } catch (error: unknown) { return senderror(
+      res,
+      500,
+      errorMessage(error)
+
+    ) }
 };
 
 /* ================= UPDATE COMMENT ================= */
@@ -59,7 +95,13 @@ export const UpdateComment = async (
   try {
     const user = req.user as AuthUser;
     if (!user) {
-      return res.status(401).json({ message: MESSAGES.UNAUTHORIZED });
+      return senderror(
+      res,
+      401,
+     MESSAGES.UNAUTHORIZED
+
+    )
+      //  res.status(401).json({ message: MESSAGES.UNAUTHORIZED });
     }
 
     const id = Number(req.params.commentId);
@@ -71,6 +113,19 @@ export const UpdateComment = async (
       user
     );
 
-    return res.status(200).json(data);
-  } catch (error: unknown) { return res.status(500).json({ message: errorMessage(error) }); }
+    return sendSuccess(
+      res,
+      200,
+      oprationUpdate("Comment"),
+      data
+
+    )
+  } catch (error: unknown) { return  senderror(
+      res,
+      500,
+      errorMessage(error)
+
+    )
+    //  res.status(500).json({ message: errorMessage(error) });
+     }
 };
