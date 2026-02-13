@@ -1,15 +1,14 @@
 import mongoose from "mongoose";
 import { sequelize } from "./sql";
 import { config } from "dotenv";
-import connectDB from "./mongo";
-import db from "../database/models";
-import { Application } from "express";
-import express  from "express";
-import { env } from "./env.config";
+// import connectDB from "./mongo";
+// import db from "../database/models";
+// import { Application } from "express";
+// import express  from "express";
 config();
 
-const app: Application = express();
-const PORT = Number(env.SERVER.PORT);
+// const app: Application = express();
+// const PORT = Number(env.SERVER.PORT);
 export const sqlConnect = async (): Promise<void> => {
     try {
         await sequelize.authenticate();
@@ -31,13 +30,13 @@ export const mongoConnect = async (): Promise<void> => {
     }
 
 }
-export const startserver = async () => {
-  connectDB();
-  const _db = db;
-  void _db;
-  await sqlConnect();
-  await mongoConnect();
-  app.listen(PORT, () => {
-    console.log(`Server is  running on http://localhost:${PORT}`);
-  });
-}
+// export const startserver = async () => {
+//   connectDB();
+//   const _db = db;
+//   void _db;
+//   await sqlConnect();
+//   await mongoConnect();
+//   app.listen(PORT, () => {
+//     console.log(`Server is  running on http://localhost:${PORT}`);
+//   });
+// }

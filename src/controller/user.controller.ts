@@ -1,16 +1,12 @@
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import * as userService from "../service/user.service";
-import { errorMessage, MESSAGES, operationCreate, operationDelete, oprationUpdate } from "../const/message";
+import {  MESSAGES, operationCreate, operationDelete, oprationUpdate } from "../const/message";
 import { env } from "../config/env.config";
 import { UserRole } from "../const/user-role";
-import { senderror, sendSuccess } from "../utils/response.util";
-
-// ---------------------------------------- JWT ----------------------------------------------
-const JWT_SECRET = env.JWT.JWT_SECRET;
-if (!JWT_SECRET) {
-  throw new Error(MESSAGES.TOKEN_NOT_DEFINE);
-}
+import {  sendSuccess } from "../utils/response.util";
+import {  ERRORS, operationFailed } from "../const/error-message";
+import { AppError } from "../utils/errorHandler";
 
 // ----------------------------------------TYPES ----------------------------------------------
 type AuthUser = {
@@ -19,20 +15,32 @@ type AuthUser = {
   email?: string;
 };
 
+const message =ERRORS.message;
+const statusCode = ERRORS.statusCode;
+// ---------------------------------------- JWT ----------------------------------------------
+const JWT_SECRET = env.JWT.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new AppError(message.NOT_FOUND("JWT Token"),statusCode.NOT_FOUND);
+}
+
 // ----------------------------------------REGISTER  ----------------------------------------------
 
 export const register = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response | void> => {
   try {
-    const { user_name, email, password, role, age } = req.body;
+    const { user_name, email, password,  age } = req.body;
+
+    if (!user_name || !email || !password) {
+      // const m =new AppError(MESSAGES.REQUIRED,404)
+      throw new AppError(message.ALL_FIELDS_REQUIRED,statusCode.ALL_FIELDS_REQUIRED);
+    }
 
     const result = await userService.registerUserService(
       user_name,
       email,
       password,
-      role,
       age
     );
 
@@ -45,9 +53,7 @@ export const register = async (
       JWT_SECRET,
       { expiresIn: "1d" }
     );
-
-    // console.log(result.message);
-    // console.log( MESSAGES.REGISTER_SUCCESS);
+// console.log(res);
 
     return sendSuccess(
       res,
@@ -56,27 +62,26 @@ export const register = async (
       result.user,
       token
     );
-  } catch (error: unknown) {
-    // const message =
-    //   error instanceof Error ? error.message : MESSAGES.BAD_REQUEST;
-    return senderror(
-      res,
-      404,
-      errorMessage(error)
-    )
+  } catch (error) {
+    // console.log(error)
+    operationFailed(error,"Register User")
   }
-};
+}
 
 // ----------------------------------------LOGIN  ----------------------------------------------
 
 export const login = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response | void> => {
   try {
     const { email, password } = req.body;
 
     const result = await userService.loginUserService(email, password);
+    if (!email || !password) {
+      // const m =new AppError(MESSAGES.REQUIRED,404)
+      throw new AppError(message.ALL_FIELDS_REQUIRED,statusCode.ALL_FIELDS_REQUIRED);
+    }
 
     const token = jwt.sign(
       {
@@ -95,19 +100,10 @@ export const login = async (
       result.user,
       token
     );
-    //  res.status(200).json({
-    //       message: result.message,
-    //       token,
-    //       user: result.user,
-    //     });
-  } catch (error: unknown) {
-    // const message =
-    //   error instanceof Error ? error.message : MESSAGES.UNAUTHORIZED;
-   return senderror(
-      res,
-      401,
-      errorMessage(error)
-    )
+  } catch (error) {
+    // console.log(error)
+
+   operationFailed(error, "login User!");
   }
 };
 
@@ -116,7 +112,7 @@ export const login = async (
 export const deleteUser = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response | void>=> {
   try {
     const authUser = req.user as AuthUser;
     const userId = Number(req.params.userId);
@@ -132,41 +128,33 @@ export const deleteUser = async (
 
     );
     // res.status(200).json(result);
-  } catch (error: unknown) {
-
-     return senderror(
-      res,
-      500,
-      errorMessage(error)
-    )
+  } catch (error) {
+    operationFailed(error,"Delete User")
   }
 };
 
 // ---------------------------------------- GET ALL USERS  ----------------------------------------------
 
 export const getUser = async (
-  _req: Request,
+  req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response | void> => {
   try {
-    const result = await userService.getAllUserService();
+     const authUser = req.user as AuthUser;
+     const userId = Number(req.params.userId);
+
+    const result = await userService.getAllUserService(userId,authUser);
     return   sendSuccess(
       res,
       200,
-      result
+      MESSAGES.SUCCESS,
+      result,
 
     );
-    // res.status(200).json(result);
+
   } catch (error: unknown) {
-    // const message =
-    //   error instanceof Error
-    //     ? error.message
-    //     : MESSAGES.INTERNAL_SERVER_ERROR;
-   return senderror(
-      res,
-      500,
-      errorMessage(error)
-    )
+
+  operationFailed(error, "Get User!");
   }
 };
 
@@ -175,21 +163,17 @@ export const getUser = async (
 export const updateUser = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response | void> => {
   try {
     const authUser = req.user as AuthUser;
     if (!authUser) {
-     return senderror(
-      res,
-      500,
-      MESSAGES.UNAUTHORIZED
-    )
+     throw new AppError(message.UNAUTHORIZED,statusCode.UNAUTHORIZED);
     }
 
     const id = Number(req.params.userId);
-    const { user_name, email, password, role, age } = req.body;
+    const { user_name, email, password, age } = req.body;
 
-    const data = await userService.updateUserService(id,authUser, user_name, email, password, role, age);
+    const data = await userService.updateUserService(id,authUser, user_name, email, password, age);
     return sendSuccess(
       res,
       200,
@@ -198,9 +182,5 @@ export const updateUser = async (
 
     );
     // res.status(200).json(data);
-  } catch (error: unknown) { return senderror(
-      res,
-      500,
-      errorMessage(error)
-    ) }
+  } catch (error: unknown) { operationFailed(error, "Update User!"); }
 };

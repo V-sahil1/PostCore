@@ -1,9 +1,13 @@
-import { MESSAGES, operationCreate, operationDelete, oprationNoteFound } from "../const/message";
+import { ERRORS } from "../const/error-message";
+import { operationCreate, operationDelete } from "../const/message";
 import db from "../database/models";
+import { AppError } from "../utils/errorHandler";
 
 const Post = db.post;
 const User = db.user;
 const Comment = db.comment;
+const message = ERRORS.message;
+const statusCode = ERRORS.statusCode
 
 type AuthUser = { id: number; role?: string };
 type IdRow = { id: number };
@@ -16,7 +20,7 @@ export const createPostService = async (
 ) => {
   if (!title) {
     // throw new Error("Title is required");
-    throw new Error(MESSAGES.REQUIRED);
+    throw new AppError(message.NOT_FOUND("Title"), statusCode.NOT_FOUND);
   }
 
   const post = await Post.create({
@@ -40,14 +44,14 @@ export const updatePostService = async (
   const post = await Post.findByPk(postId);
   if (!post) {
     // throw new Error("Post not found");
-    throw new Error(oprationNoteFound("Post"));
+    throw new AppError(message.NOT_FOUND("Post"), statusCode.NOT_FOUND);
   }
 
   const postRow = post as unknown as PostRow;
 
   if (postRow.user_id !== user.id && user.role !== "admin") {
     // throw new Error("Not authorized to update post");
-    throw new Error(MESSAGES.UNAUTHORIZED);
+    throw new AppError(message.UNAUTHORIZED, statusCode.UNAUTHORIZED);
   }
 
   await post.update({ title });
@@ -75,7 +79,7 @@ export const getAllPostsService = async () => {
 export const getPostByIdService = async (id: number) => {
   const post = await Post.findByPk(id);
   if (!post) {
-    throw new Error(oprationNoteFound("Post"));
+    throw new AppError(message.NOT_FOUND("Post"), statusCode.NOT_FOUND)
   }
   return post;
 };
@@ -87,13 +91,13 @@ export const deletePostService = async (
 ) => {
   const post = await Post.findByPk(postId);
   if (!post) {
-    throw new Error(oprationNoteFound("Post"));
+    throw new AppError(message.NOT_FOUND("Post"), statusCode.NOT_FOUND);
   }
 
   const postRow = post as unknown as PostRow;
 
   if (postRow.user_id !== user.id) {
-    throw new Error(MESSAGES.UNAUTHORIZED);
+    throw new AppError(message.UNAUTHORIZED, statusCode.UNAUTHORIZED);
   }
 
   const comments = await Comment.findAll({
@@ -109,5 +113,5 @@ export const deletePostService = async (
   }
 
   await post.destroy();
-  return { message: operationDelete("Post")};
+  return { message: operationDelete("Post") };
 };

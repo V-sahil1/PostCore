@@ -10,10 +10,10 @@ router.get('/get', getpost)
 
 router.post('/post', authenticateJWT, validate(createpostSchema), creatpost);
 //-------------------------------------------------------------------get post
-router.get('/get-post/:pid', getpostById)
+router.get('/post/:postId', getpostById)
 
-router.patch('/update-post/:upId', authenticateJWT, updatePost)
+router.patch('/post/:postId', authenticateJWT, updatePost)
 
-router.delete('/delete-post/:delId', authenticateJWT, postDelete)
+router.delete('/post/:postId', authenticateJWT, postDelete)
 
 export default router;

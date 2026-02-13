@@ -39,23 +39,31 @@
         }
       }
     },
-    "/user/get-user": {
+    "/user/user/{userId}": {
       "get": {
         "tags": [
           "User"
         ],
         "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
           },
-          "500": {
-            "description": "Internal Server Error"
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
           }
         }
-      }
-    },
-    "/user/delete-user/{userId}": {
+      },
       "delete": {
         "tags": [
           "User"
@@ -75,19 +83,11 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
+          "default": {
+            "description": ""
           }
         }
-      }
-    },
-    "/user/update-user/{userId}": {
+      },
       "patch": {
         "tags": [
           "User"
@@ -120,9 +120,6 @@
                 "password": {
                   "example": "any"
                 },
-                "role": {
-                  "example": "any"
-                },
                 "age": {
                   "example": "any"
                 }
@@ -131,14 +128,38 @@
           }
         ],
         "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/user/paginated": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
           "200": {
             "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
@@ -150,8 +171,8 @@
         ],
         "description": "",
         "responses": {
-          "200": {
-            "description": "OK"
+          "default": {
+            "description": ""
           }
         }
       }
@@ -182,19 +203,13 @@
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
+          "default": {
+            "description": ""
           }
         }
       }
     },
-    "/post/get-post/{pid}": {
+    "/post/post/{postId}": {
       "get": {
         "tags": [
           "Post"
@@ -202,23 +217,18 @@
         "description": "",
         "parameters": [
           {
-            "name": "pid",
+            "name": "postId",
             "in": "path",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
+          "default": {
+            "description": ""
           }
         }
-      }
-    },
-    "/post/update-post/{upId}": {
+      },
       "patch": {
         "tags": [
           "Post"
@@ -226,7 +236,7 @@
         "description": "",
         "parameters": [
           {
-            "name": "upId",
+            "name": "postId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -250,19 +260,11 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
+          "default": {
+            "description": ""
           }
         }
-      }
-    },
-    "/post/delete-post/{delId}": {
+      },
       "delete": {
         "tags": [
           "Post"
@@ -270,7 +272,7 @@
         "description": "",
         "parameters": [
           {
-            "name": "delId",
+            "name": "postId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -282,14 +284,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
+          "default": {
+            "description": ""
           }
         }
       }
@@ -326,11 +322,8 @@
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "500": {
-            "description": "Internal Server Error"
+          "default": {
+            "description": ""
           }
         }
       }
@@ -342,13 +335,13 @@
         ],
         "description": "",
         "responses": {
-          "200": {
-            "description": "OK"
+          "default": {
+            "description": ""
           }
         }
       }
     },
-    "/comment/update-Comment/{commentId}": {
+    "/comment/{commentId}": {
       "patch": {
         "tags": [
           "Comment"
@@ -380,19 +373,13 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
+          "default": {
+            "description": ""
           }
         }
       }
     },
-    "/comment/delete/{delId}": {
+    "/comment/comment/{commentId}": {
       "delete": {
         "tags": [
           "Comment"
@@ -400,7 +387,7 @@
         "description": "",
         "parameters": [
           {
-            "name": "delId",
+            "name": "commentId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -412,14 +399,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
+          "default": {
+            "description": ""
           }
         }
       }
@@ -438,14 +419,8 @@
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
+          "default": {
+            "description": ""
           }
         }
       }
@@ -472,9 +447,6 @@
                 "password": {
                   "example": "any"
                 },
-                "role": {
-                  "example": "any"
-                },
                 "age": {
                   "example": "any"
                 }
@@ -483,11 +455,8 @@
           }
         ],
         "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "400": {
-            "description": "Bad Request"
+          "default": {
+            "description": ""
           }
         }
       }
@@ -516,11 +485,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
+          "default": {
+            "description": ""
           }
         }
       }

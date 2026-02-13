@@ -8,6 +8,7 @@ import passport from "passport";
 const router = Router();
 
 router.post('/token', saveToken)
+
 router.post("/register",
     validate(createSchema), register);
 router.post(

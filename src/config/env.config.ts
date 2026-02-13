@@ -1,5 +1,6 @@
 import "dotenv/config";
-import { MESSAGES } from "../const/message";
+import { ERRORS } from "../const/error-message";
+import { AppError } from "../utils/errorHandler";
 
 export type Env = "development" | "test" | "production";
 
@@ -8,7 +9,7 @@ const processEnv = process.env;
 function getEnvValue(name: string): string {
   const value = processEnv[name];
   if (!value) {
-    throw new Error(`${MESSAGES.ENV_MISSING}: ${name}`);
+    throw new AppError(`${ERRORS.message.NOT_FOUND("ENV")}: ${name}`,ERRORS.statusCode.NOT_FOUND);
   }
   return value;
 }

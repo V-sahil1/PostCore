@@ -3,32 +3,37 @@
 
 import fs from "fs";
 import path from "path";
-import { Sequelize, DataTypes } from "sequelize";
+import { Sequelize, DataTypes, ModelStatic } from "sequelize";
 import { configs } from "../../config/sql";
 import { env } from "../../config/env.config";
+import { User } from "./user";
+import { Post } from "./post";
+import { Token } from "./token";
+import { Comment } from "./comment";
 
 const sequelizeConfig = configs[env.NODE_ENV];
-console.log(sequelizeConfig);
+// console.log(sequelizeConfig);
 
 if (!sequelizeConfig) {
   throw new Error(`Missing database configuration for env: ${env}`);
 }
 
 const basename = path.basename(__filename);
-console.log(basename);
-console.log(__filename);
+// console.log(basename);
+// console.log(__filename);
 
 interface DB {
   [key: string]: any;
   sequelize: Sequelize;
+  user: ModelStatic<User>;
+  post: ModelStatic<Post>;
+   token: ModelStatic<Token>;
+   commment: ModelStatic<Comment>;
   Sequelize: typeof Sequelize;
 }
 
 const db = {} as DB;
 
-/**
- * Create Sequelize instance
- */
 const sequelize = new Sequelize(
 
   sequelizeConfig.database,
@@ -40,7 +45,7 @@ const sequelize = new Sequelize(
     logging: false,
   }
 );
- console.log(sequelizeConfig.database);
+// console.log(sequelizeConfig.database);
 
   //Load models
 
@@ -65,7 +70,7 @@ Object.keys(db).forEach((modelName) => {
     db[modelName].associate(db);
   }
 });
-console.log(Object.keys(db));
+//console.log(Object.keys(db));
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

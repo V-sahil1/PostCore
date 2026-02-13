@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const userSchema = new mongoose.Schema({
+const errorSchema = new mongoose.Schema({
   method: String,
   url: String,
   status: Number,
@@ -7,6 +7,9 @@ const userSchema = new mongoose.Schema({
   ip: String,
   userAgent: String,
   message: String,
+  errorStack: String,
+  errorType: String,
+  bodyMessage:String,
   time: {
     type: Date,
     default: Date.now
@@ -15,6 +18,6 @@ const userSchema = new mongoose.Schema({
   , {
 
   });
-export default mongoose.model("Error", userSchema)
+export const ErrorModel = mongoose.model("Error", errorSchema)
 
 //change

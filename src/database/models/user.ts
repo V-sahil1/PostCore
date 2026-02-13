@@ -1,50 +1,66 @@
-import { DataTypes, type Sequelize, Model, ModelStatic } from "sequelize";
-import{ USER_ROLES, type UserRole} from "../../const/user-role";
+import {
+  DataTypes,
+  type Sequelize,
+  Model,
+  type ModelStatic,
+  type Optional,
+} from "sequelize";
+import { USER_ROLES, type UserRole } from "../../const/user-role";
 
-type ModelWithAssociate = ModelStatic<Model> & {
-  associate: (models: Record<string, ModelStatic<Model>>) => void;
-};
+export interface UserAttributes {
+  id?: number;
+  user_name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  age: number;
+}
 
-const UserModel = (sequelize: Sequelize): ModelWithAssociate => {
-  class User extends Model {
-    declare user_name: string;
-    declare email: string;
-    declare password: string;
-    declare role: UserRole;
-    declare age: number;
+type UserCreationAttributes = Optional<UserAttributes, "id" | "age">;
 
-    // Add static associate method with null check
-    static associate(models: Record<string, ModelStatic<Model>>) {
-      if (models.post) {
-        User.hasMany(models.post, {
-          foreignKey: "user_id",
-          as: "postDetails"
-        });
-      }
+export class User
+  extends Model<UserAttributes, UserCreationAttributes>
+  implements UserAttributes
+{
+  declare id: number;
+  declare user_name: string;
+  declare email: string;
+  declare password: string;
+  declare role: UserRole;
+  declare age: number;
 
-      if (models.comment) {
-        User.hasMany(models.comment, {
-          foreignKey: { name: "user_id", allowNull: true },
-        });
-      }
+  static associate(models: Record<string, ModelStatic<Model>>) {
+    if (models.post) {
+      User.hasMany(models.post, {
+        foreignKey: "user_id",
+        as: "postDetails",
+      });
+    }
 
+    if (models.comment) {
+      User.hasMany(models.comment, {
+        foreignKey: { name: "user_id", allowNull: true },
+      });
     }
   }
+}
 
+/**
+ * 🔹 Model Init Function
+ */
+const UserModel = (sequelize: Sequelize): ModelStatic<User> => {
   User.init(
     {
       user_name: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+        unique: true,
       },
       email: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
-        validate: {
-          isEmail: true
-        }
+        validate: { isEmail: true },
       },
       password: {
         type: DataTypes.STRING,
@@ -53,23 +69,23 @@ const UserModel = (sequelize: Sequelize): ModelWithAssociate => {
       role: {
         type: DataTypes.ENUM(...Object.values(USER_ROLES)),
         allowNull: false,
-        defaultValue: "user"
+        defaultValue: USER_ROLES.USER,
       },
       age: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        defaultValue: 10
+        defaultValue: 10,
       },
     },
     {
       sequelize,
-      underscored: true,
       tableName: "users",
-      modelName: "user"
+      modelName: "user",
+      underscored: true,
     }
   );
 
-  return User as ModelWithAssociate;
+  return User;
 };
 
 export default UserModel;

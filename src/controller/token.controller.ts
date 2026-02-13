@@ -1,23 +1,21 @@
 import type { Request, Response } from "express";
 import * as tokenService from "../service/token.service";
-import { errorMessage, MESSAGES } from "../const/message";
-import { senderror, sendSuccess } from "../utils/response.util";
+import {  MESSAGES } from "../const/message";
+import {  sendSuccess } from "../utils/response.util";
+import { ERRORS, operationFailed } from "../const/error-message";
+import { AppError } from "../utils/errorHandler";
 
 // ---------------------------------------- SAVE TOKEN  ----------------------------------------------
 
 export const saveToken = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response|void> => {
   try {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      return sendSuccess(
-        res,
-        401,
-        MESSAGES.TOKEN_MISSING
-      )
+      throw new AppError(ERRORS.message.UNAUTHORIZED,ERRORS.statusCode.UNAUTHORIZED)
       //  res.status(401).json({ message: MESSAGES.TOKEN_MISSING });
     }
 
@@ -34,10 +32,6 @@ export const saveToken = async (
     //  res.status(201).json(result);
   } catch (error: unknown) {
 
-    return senderror(
-      res,
-      500,
-      errorMessage(error)
-    )
+    operationFailed(error,"Save Token")
   }
 };

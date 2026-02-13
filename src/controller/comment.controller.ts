@@ -1,7 +1,9 @@
 import type { Request, Response } from "express";
 import * as commentService from "../service/comment.service";
-import { errorMessage, MESSAGES, operationCreate, operationDelete, oprationUpdate } from "../const/message";
-import { senderror, sendSuccess } from "../utils/response.util";
+import { MESSAGES, operationCreate, operationDelete, oprationUpdate } from "../const/message";
+import { sendSuccess } from "../utils/response.util";
+import { ERRORS, operationFailed } from "../const/error-message";
+import { AppError } from "../utils/errorHandler";
 
 type AuthUser = { id: number; role?: string };
 
@@ -24,7 +26,7 @@ export const getcomment = async (
 export const comment = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response | void> => {
   try {
     const user = req.user as AuthUser | undefined;
     const { description } = req.body;
@@ -44,33 +46,24 @@ export const comment = async (
 
     )
   } catch (error: unknown) {
-    return senderror(
-      res,
-      500,
-      errorMessage(error)
-
-    )
+    operationFailed(error,"Create Comment")
     // res.status(500).json({ message: errorMessage(error) });
   }
 };
 
 /* ================= DELETE COMMENT ================= */
-export const deletecomment = async (
+export const deleteComment = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response | void> => {
   try {
     const user = req.user as AuthUser;
     if (!user) {
-      return senderror(
-      res,
-      500,
-     MESSAGES.UNAUTHORIZED
-
-    )
+    throw new AppError(ERRORS.message.UNAUTHORIZED,ERRORS.statusCode.UNAUTHORIZED)
     }
+    console.log(user);
 
-    const id = Number(req.params.delId);
+    const id = Number(req.params.commentId);
     const result = await commentService.deleteCommentService(id, user);
     return sendSuccess(
       res,
@@ -79,32 +72,23 @@ export const deletecomment = async (
       result
 
     )
-  } catch (error: unknown) { return senderror(
-      res,
-      500,
-      errorMessage(error)
-
-    ) }
+  } catch (error) {operationFailed(error,"Delete Comment") }
 };
 
 /* ================= UPDATE COMMENT ================= */
-export const UpdateComment = async (
+export const updateComment = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response | void> => {
   try {
     const user = req.user as AuthUser;
     if (!user) {
-      return senderror(
-      res,
-      401,
-     MESSAGES.UNAUTHORIZED
-
-    )
+     throw new AppError(ERRORS.message.UNAUTHORIZED,ERRORS.statusCode.UNAUTHORIZED)
       //  res.status(401).json({ message: MESSAGES.UNAUTHORIZED });
     }
 
     const id = Number(req.params.commentId);
+
     const { description } = req.body;
 
     const data = await commentService.updateCommentService(
@@ -120,12 +104,14 @@ export const UpdateComment = async (
       data
 
     )
-  } catch (error: unknown) { return  senderror(
-      res,
-      500,
-      errorMessage(error)
+  } catch (error) {
+    operationFailed(error,"Upadate Comment")
+    // return  senderror(
+    //   res,
+    //   500,
+    //   errorMessage(error)
 
-    )
-    //  res.status(500).json({ message: errorMessage(error) });
+    // )
+    // //  res.status(500).json({ message: errorMessage(error) });
      }
 };

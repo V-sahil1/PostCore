@@ -1,23 +1,22 @@
 import type { Request, Response } from "express";
 import * as postService from "../service/post.service";
-import { errorMessage, MESSAGES, operationCreate, operationDelete, oprationUpdate } from "../const/message";
-import { senderror, sendSuccess } from "../utils/response.util";
+import {  MESSAGES, operationCreate, operationDelete, oprationUpdate } from "../const/message";
+import {  sendSuccess } from "../utils/response.util";
+import { ERRORS, operationFailed } from "../const/error-message";
+import { AppError } from "../utils/errorHandler";
 
 type AuthUser = { id: number; role?: string };
-
+const message  = ERRORS.message
+const statusCode  = ERRORS.statusCode
 /* ================= CREATE POST ================= */
 export const creatpost = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response |void> => {
   try {
     const user = req.user as AuthUser;
     if (!user) {
-      return senderror(
-        res,
-        404,
-        MESSAGES.UNAUTHORIZED
-      )
+   throw new AppError(message.UNAUTHORIZED, statusCode.UNAUTHORIZED);
     }
 
     const { title } = req.body;
@@ -28,21 +27,21 @@ export const creatpost = async (
       operationCreate("Post"),
       result
     )
-  } catch (error: unknown) { return res.status(500).json({ message: errorMessage(error) }); }
+  } catch (error) {operationFailed(error, "Create Post!");  }
 };
 
 /* ================= UPDATE POST ================= */
 export const updatePost = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response|void> => {
   try {
     const user = req.user as AuthUser;
     if (!user) {
-      return res.status(401).json({ message: MESSAGES.UNAUTHORIZED });
+         throw new AppError(message.NOT_FOUND("User"),statusCode.NOT_FOUND);
     }
 
-    const id = Number(req.params.upId);
+    const id = Number(req.params.postId);
     const { title } = req.body;
 
     const data = await postService.updatePostService(id, title, user);
@@ -54,12 +53,8 @@ export const updatePost = async (
 
     )
     //  .status(200).json(data);
-  } catch (error: unknown) {
-    return senderror(
-      res,
-      500,
-      errorMessage(error)
-    )
+  } catch (error) {
+    operationFailed(error, "Update Post!");
     //  res.status(500).json({ message: errorMessage(error) });
   }
 };
@@ -83,9 +78,9 @@ export const getpost = async (
 export const getpostById = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response | void> => {
   try {
-    const id = Number(req.params.pid);
+    const id = Number(req.params.postId);
     const data = await postService.getPostByIdService(id);
     return sendSuccess(
       res,
@@ -95,11 +90,7 @@ export const getpostById = async (
 
     )
   } catch (error: unknown) {
-    return senderror(
-      res,
-      500,
-      errorMessage(error)
-    )
+        operationFailed(error, "Get Post!");
   }
 };
 
@@ -107,18 +98,14 @@ export const getpostById = async (
 export const postDelete = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response | void> => {
   try {
     const user = req.user as AuthUser;
     if (!user) {
-      return senderror(
-        res,
-        401,
-        MESSAGES.UNAUTHORIZED
-      )
+     throw new AppError(message.NOT_FOUND("User"),statusCode.NOT_FOUND);
     }
 
-    const id = Number(req.params.delId);
+    const id = Number(req.params.postId);
     const result = await postService.deletePostService(id, user);
     return sendSuccess(
       res,
@@ -128,10 +115,6 @@ export const postDelete = async (
 
     )
   } catch (error: unknown) {
-    return senderror(
-      res,
-      500,
-      errorMessage(error)
-    )
+   operationFailed(error,"Delete Post")
   }
 };

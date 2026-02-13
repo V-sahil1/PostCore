@@ -2,9 +2,11 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
 import db from "../database/models";
-import { MESSAGES } from "../const/message";
+
+import { ERRORS } from "../const/error-message";
 
 const User = db.user;
+const message = ERRORS.message;
 
 // Define a User type based on your database model
 interface UserInstance {
@@ -23,13 +25,13 @@ passport.use(
         const user = await User.findOne({ where: { email } });
 
         if (!user) {
-          return done(null, false, { message: MESSAGES.USER_NOT_FOUND });
+          return done(null, false, { message: message.NOT_FOUND("User") });
         }
 
         const userInstance = user as unknown as UserInstance;
         const isMatch = await bcrypt.compare(password, userInstance.password);
         if (!isMatch) {
-          return done(null, false, { message: MESSAGES.INVALID_CREDENTIALS });
+          return done(null, false, { message: message.INVALID("Password") });
         }
 
         return done(null, user);

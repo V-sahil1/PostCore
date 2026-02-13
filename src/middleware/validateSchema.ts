@@ -1,23 +1,24 @@
 import { Request, Response, NextFunction } from "express";
 import { ObjectSchema } from "joi";
-import { MESSAGES } from "../const/message";
-
+// import { MESSAGES } from "../const/message";
+import { AppError } from "../utils/errorHandler";
 const validate =
   (schema: ObjectSchema) =>
-    (req: Request, res: Response, next: NextFunction): void => {
-      const { error } = schema.validate(req.body, {
-        abortEarly: false, // return all errors
-      });
+  (req: Request, res: Response, next: NextFunction): void => {
 
-      if (error) {
-        res.status(400).json({
-          message: MESSAGES.VALIDATION_ERROR,
-          details: error.details.map(d => d.message),
-        });
-        return;
-      }
+    const { error } = schema.validate(req.body, {
+      abortEarly: false,
+    });
 
-      next();
-    };
+    if (error) {
+      const details = error.details.map((d) => d.message);
+      const message = details.join(", ");
+      // console.log(message);
+
+      throw new AppError(message, 400);
+    }
+
+    next();
+  };
 
 export default validate;

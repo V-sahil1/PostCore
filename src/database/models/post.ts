@@ -1,27 +1,54 @@
-import { DataTypes, Model, ModelStatic, type Sequelize } from "sequelize";
+import {
+  DataTypes,
+  Model,
+  type Sequelize,
+  type Optional,
+  type ModelStatic,
+} from "sequelize";
 
-type ModelWithAssociate = ModelStatic<Model> & {
-  associate: (models: Record<string, ModelStatic<Model>>) => void
-};
-const PostModel = (sequelize: Sequelize): ModelWithAssociate => {
-  class Post extends Model {
-    declare title: string;
-    declare user_id: number;
-    // Add static associate method with null check
-    static associate(models: Record<string, ModelStatic<Model>>) {
-      if (models.user) {
+export interface PostAttributes {
+  id: number;
+  title: string;
+  user_id: number;
+}
 
-        Post.belongsTo(models.user, { foreignKey: "user_id", as: "UserInfo" });
-      }
-      if (models.comment) {
-        Post.hasMany(models.comment, { foreignKey: "post_id" });
-      }
+type PostCreationAttributes = Optional<PostAttributes, "id">;
+
+export class Post
+  extends Model<PostAttributes, PostCreationAttributes>
+  implements PostAttributes
+{
+  declare id: number;
+  declare title: string;
+  declare user_id: number;
+
+  static associate(models: Record<string, ModelStatic<Model>>) {
+    if (models.user) {
+      Post.belongsTo(models.user, {
+        foreignKey: "user_id",
+        as: "UserInfo",
+      });
+    }
+
+    if (models.comment) {
+      Post.hasMany(models.comment, {
+        foreignKey: "post_id",
+      });
     }
   }
+}
+
+const PostModel = (sequelize: Sequelize): ModelStatic<Post> => {
   Post.init(
     {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+      },
       title: {
         type: DataTypes.STRING,
+        allowNull: false,
       },
       user_id: {
         type: DataTypes.INTEGER,
@@ -33,16 +60,14 @@ const PostModel = (sequelize: Sequelize): ModelWithAssociate => {
       },
     },
     {
-
       sequelize,
       underscored: true,
       tableName: "posts",
-      modelName: "post"
-
+      modelName: "post",
     }
   );
 
-  return Post as ModelWithAssociate;
+  return Post;
 };
 
 export default PostModel;

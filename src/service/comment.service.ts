@@ -1,8 +1,12 @@
-import { MESSAGES, operationCreate, operationDelete, oprationNoteFound, oprationRequired } from "../const/message";
+import { ERRORS } from "../const/error-message";
+import {  operationCreate, operationDelete } from "../const/message";
 import db from "../database/models";
+import { AppError } from "../utils/errorHandler";
 
 const Comment = db.comment;
 const Post = db.post;
+const message =ERRORS.message;
+const statusCode = ERRORS.statusCode;
 
 type AuthUser = { id: number; role?: string };
 type CommentRow = { user_id: number };
@@ -19,11 +23,11 @@ export const createCommentService = async (
   user?: AuthUser
 ) => {
   if (!description) {
-    throw new Error(oprationRequired("Description"));
+    throw new AppError(message.NOT_FOUND("Description"),statusCode.NOT_FOUND);
   }
  const post = await Post.findByPk(postId);
  if(!post){
-   throw new Error(oprationNoteFound("Post"));
+   throw new AppError(message.NOT_FOUND("Post"),statusCode.NOT_FOUND);
  }
 
   const comment = await Comment.create({
@@ -46,13 +50,13 @@ export const deleteCommentService = async (
 ) => {
   const comment = await Comment.findByPk(commentId);
   if (!comment) {
-    throw new Error(oprationRequired("Comment"));
+    throw new AppError(message.NOT_FOUND("Comment"),statusCode.NOT_FOUND);
   }
 
   const commentRow = comment as unknown as CommentRow;
 
   if (commentRow.user_id !== user.id && user.role !== "admin") {
-    throw new Error(MESSAGES.FORBIDDEN);
+    throw new AppError(message.UNAUTHORIZED,statusCode.UNAUTHORIZED);
   }
 
   await comment.destroy();
@@ -61,25 +65,24 @@ export const deleteCommentService = async (
 
 /* ================= UPDATE COMMENT ================= */
 export const updateCommentService = async (
-  commentId: number,
+  id: number,
   description: string,
   user: AuthUser
 ) => {
+  console.log(id);
   if (!description) {
     // throw new Error("Comment is required");
-    throw new Error(oprationRequired("Description"));
+    throw new AppError(message.NOT_FOUND("Description"),statusCode.NOT_FOUND);
   }
 
-  const comment = await Comment.findByPk(commentId);
+  const comment = await Comment.findByPk(id);
   if (!comment) {
-    throw new Error(oprationNoteFound("Comment"));
+    throw new AppError(message.NOT_FOUND("Comment"),statusCode.NOT_FOUND);
   }
 
-  const commentRow = comment as unknown as CommentRow;
-
-  if (commentRow.user_id !== user.id && user.role !== "admin") {
+  if (comment.user_id !== user.id && user.role !== "admin") {
     // throw new Error("Not authorized to update comment");
-    throw new Error(MESSAGES.UNAUTHORIZED);
+    throw new AppError(message.UNAUTHORIZED,statusCode.UNAUTHORIZED);
   }
 
   await comment.update({ description });

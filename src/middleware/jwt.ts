@@ -1,14 +1,18 @@
 import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
-import { errorMessage, MESSAGES } from "../const/message";
+// import {  MESSAGES } from "../const/message";
 import { env } from "../config/env.config";
-import { senderror } from "../utils/response.util";
+import { AppError } from "../utils/errorHandler";
+import { ERRORS, operationFailed } from "../const/error-message";
 
 type AuthUser = {
   id: number;
   email?: string;
   role?: string;
 } & jwt.JwtPayload;
+
+const  message = ERRORS.message;
+const statusCode = ERRORS.statusCode;
 
 export const authenticateJWT = (
   req: Request,
@@ -18,48 +22,28 @@ export const authenticateJWT = (
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !/^Bearer\s+/i.test(authHeader)) {
-     return senderror(
-      res,
-      404,
-      MESSAGES.TOKEN_MISSING
-    )
+    throw new AppError(message.UNAUTHORIZED ,statusCode.UNAUTHORIZED)
   }
 
   const token = authHeader.split(" ")[1];
 
   if (!token || typeof token !== 'string') {
-     return senderror(
-      res,
-      404,
-      MESSAGES.TOKEN_MISSING
-    )
+     throw new AppError(message.NOT_FOUND("Token"),statusCode.NOT_FOUND)
   }
 
   if (!env.JWT.JWT_SECRET) {
-    return senderror(
-      res,
-      500,
-      MESSAGES.TOKEN_NOT_DEFINE
-    )
+   throw new AppError(message.NOT_FOUND("Token"),statusCode.NOT_FOUND)
   }
 
   try {
     const decoded = jwt.verify(token, env.JWT.JWT_SECRET);
     if (typeof decoded === "string") {
-       return senderror(
-      res,
-      404,
-      MESSAGES.TOKEN_MISSING
-    )
+    throw new AppError(message.INVALID("Token"),statusCode.UNAUTHORIZED)
     }
     req.user = decoded as AuthUser; // ✅ attach user
     next(); // ✅ go to controller
   } catch (error: unknown) {
 
-     return senderror(
-           res,
-           500,
-           errorMessage(error)
-         )
+    operationFailed(error," Authentication");
   }
 };
