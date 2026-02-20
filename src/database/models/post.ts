@@ -16,8 +16,7 @@ type PostCreationAttributes = Optional<PostAttributes, "id">;
 
 export class Post
   extends Model<PostAttributes, PostCreationAttributes>
-  implements PostAttributes
-{
+  implements PostAttributes {
   declare id: number;
   declare title: string;
   declare user_id: number;

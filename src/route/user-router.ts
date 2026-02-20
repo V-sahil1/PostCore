@@ -1,9 +1,9 @@
 import { Router } from "express";
 
-import { deleteUser, getUser, updateUser } from "../controller/user.controller";
+import { deleteUser, getPaginated, getUser, overview, updateUserProfile } from "../controller/user.controller";
 
 import { authenticateJWT } from "../middleware/jwt";
-import { createSchema } from "../validator/joi";
+import { updateSchema } from "../validator/joi";
 import validate from "../middleware/validateSchema";
 import { getPaginatedUsers } from "../service/user.service";
 // import {  } from "../../controller/route";
@@ -11,13 +11,58 @@ import { getPaginatedUsers } from "../service/user.service";
 const router = Router();
 
 router.get(
-    "/user/:userId",authenticateJWT, getUser
+  "/user-post-overview", authenticateJWT, overview
+);
+
+router.get(
+  "/:userId", authenticateJWT, getUser
 );
 router.get(
-    "/paginated",authenticateJWT, getPaginatedUsers
+  "/", authenticateJWT, getPaginated
 );
-router.delete('/user/:userId', authenticateJWT, deleteUser);
+router.delete('/:userId', authenticateJWT, deleteUser);
 
-router.patch('/user/:userId', authenticateJWT, validate(createSchema),updateUser)
+router.patch('/:userId'
+  ,
+  authenticateJWT,
+  /*
+    #swagger.tags = ['User']
+    #swagger.summary = 'Update user profile'
+    #swagger.parameters['authorization'] = {
+      in: 'header',
+      required: true,
+      type: 'string',
+      description: 'Bearer token'
+    }
+    #swagger.requestBody = {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: 'object',
+            properties: {
+              user_name: {
+                type: 'string',
+                example: 'john_doe'
+              },
+              email: {
+                type: 'string',
+                example: 'john@example.com'
+              },
+              password: {
+                type: 'string',
+                example: 'newpassword123'
+              }
+            }
+          }
+        }
+      }
+    }
+    #swagger.responses[200] = { description: 'User updated successfully' }
+    #swagger.responses[400] = { description: 'At least one field is required' }
+    #swagger.responses[401] = { description: 'Unauthorized' }
+    #swagger.responses[404] = { description: 'User not found' }
+    #swagger.responses[409] = { p: 'Email already in use' }
+    */validate(updateSchema), updateUserProfile);
 
 export default router;

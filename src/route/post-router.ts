@@ -1,19 +1,20 @@
 import { Router } from "express";
-import { creatpost, getpost, getpostById, postDelete, updatePost } from "../controller/post.controller";
+import { creatpost, getpostById, postDelete, postpaggination, updatePost } from "../controller/post.controller";
 import { authenticateJWT } from "../middleware/jwt";
 import { createpostSchema } from "../validator/joi";
 import validate from "../middleware/validateSchema";
+// import { getPaginatedPost } from "../service/post.service";
 
 const router = Router();
 
-router.get('/get', getpost)
+router.get('/', postpaggination)
 
-router.post('/post', authenticateJWT, validate(createpostSchema), creatpost);
+router.post('/', authenticateJWT, validate(createpostSchema), creatpost);
 //-------------------------------------------------------------------get post
-router.get('/post/:postId', getpostById)
+router.get('/:postId', getpostById)
 
-router.patch('/post/:postId', authenticateJWT, updatePost)
+router.patch('/:postId', authenticateJWT, updatePost)
 
-router.delete('/post/:postId', authenticateJWT, postDelete)
+router.delete('/:postId', authenticateJWT, postDelete)
 
 export default router;

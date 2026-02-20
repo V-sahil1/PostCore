@@ -1,24 +1,24 @@
-import { Request, Response, NextFunction } from "express";
-import { ObjectSchema } from "joi";
+import type { Request, Response, NextFunction } from "express";
+import type { ObjectSchema } from "joi";
 // import { MESSAGES } from "../const/message";
 import { AppError } from "../utils/errorHandler";
 const validate =
   (schema: ObjectSchema) =>
-  (req: Request, res: Response, next: NextFunction): void => {
+    (req: Request, res: Response, next: NextFunction): void => {
 
-    const { error } = schema.validate(req.body, {
-      abortEarly: false,
-    });
+      const { error } = schema.validate(req.body, {
+        abortEarly: false,
+      });
 
-    if (error) {
-      const details = error.details.map((d) => d.message);
-      const message = details.join(", ");
-      // console.log(message);
+      if (error) {
+        const details = error.details.map((d) => d.message);
+        const message = details.join(", ");
+        // console.log(message);
 
-      throw new AppError(message, 400);
-    }
+        throw new AppError(message, 400);
+      }
 
-    next();
-  };
+      next();
+    };
 
 export default validate;

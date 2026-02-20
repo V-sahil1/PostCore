@@ -1,17 +1,28 @@
 import db from "../database/models";
 import bcrypt from "bcrypt";
 import { MESSAGES, operationCreate, operationDelete } from "../const/message";
-import { USER_ROLES, UserRole } from "../const/user-role";
+import type { UserRole } from "../const/user-role";
+import { USER_ROLES } from "../const/user-role";
 import { AppError } from "../utils/errorHandler";
-import { ERRORS, operationFailed } from "../const/error-message";
-import { Request, Response } from "express";
+import { ERRORS, globalErrorHandler } from "../const/error-message";
+import type { IncludeOptions } from "sequelize";
+import { Order } from "sequelize";
+// import { User } from "../database/models/user";
 
 const User = db.user;
 const Post = db.post;
 const Comment = db.comment;
+interface IUserAttributes {
+  id: number;
+  user_name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  age?: number;
+}
 
-const message = ERRORS.message;
-const statusCode = ERRORS.statusCode;
+const message = ERRORS.MESSAGES;
+const statusCode = ERRORS.STATUS_CODE;
 type AuthUser = {
   id: number;
   role?: UserRole;
@@ -34,7 +45,7 @@ export const deleteUserService = async (
   }
 
   if (authUser.id !== targetUserId && authUser.role !== "admin") {
-  throw new AppError(message.UNAUTHORIZED, statusCode.UNAUTHORIZED);
+    throw new AppError(message.UNAUTHORIZED, statusCode.UNAUTHORIZED);
   }
 
   const comments = await Comment.findAll({
@@ -74,13 +85,13 @@ export const registerUserService = async (
   age?: number
 ) => {
   if (!user_name || !email || !password) {
-    throw new AppError(message.ALL_FIELDS_REQUIRED,statusCode.ALL_FIELDS_REQUIRED,);
+    throw new AppError(message.ALL_FIELDS_REQUIRED, statusCode.ALL_FIELDS_REQUIRED,);
   }
-const existingUser = await db.user.findOne({ where: { email } });
+  const existingUser = await db.user.findOne({ where: { email } });
 
-if (existingUser) {
-  throw new AppError(message.CONFLICT("User"), 400);
-}
+  if (existingUser) {
+    throw new AppError(message.CONFLICT("User"), 400);
+  }
 
   const hash = await bcrypt.hash(password, 10);
 
@@ -89,25 +100,17 @@ if (existingUser) {
     email,
     password: hash,
     role: USER_ROLES.USER,
-   ...(age !== undefined && { age })
+    ...(age !== undefined && { age })
   });
-
-  const createdUser = user as unknown as {
-    id: number;
-    user_name: string;
-    email: string;
-    role: UserRole;
-    age: number;
-  };
 
   return {
     message: operationCreate("User"),
     user: {
-      id: createdUser.id,
-      user_name: createdUser.user_name,
-      email: createdUser.email,
-      role: createdUser.role,
-      age: createdUser.age,
+      id: user.id,
+      user_name: user.user_name,
+      email: user.email,
+      role: user.role,
+      age: user.age,
     },
   };
 };
@@ -123,45 +126,47 @@ export const loginUserService = async (email: string, password: string) => {
     throw new AppError(message.INVALID("Email"), statusCode.UNAUTHORIZED);
   }
 
-  const foundUser = user as unknown as {
-    id: number;
-    email: string;
-    role: string;
-    password: string;
-  };
+  // const foundUser = user as unknown as {
+  //   id: number;
+  //   email: string;
+  //   role: UserRole;
+  //   password: string;
+  // };
 
-  const isMatch = await bcrypt.compare(password, foundUser.password);
+  const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw new AppError(message.INVALID("Password"),  statusCode.UNAUTHORIZED);
+    throw new AppError(message.INVALID("Password"), statusCode.UNAUTHORIZED);
   }
 
   return {
     message: MESSAGES.LOGIN_SUCCESS,
     user: {
-      id: foundUser.id,
-      email: foundUser.email,
-      role: foundUser.role,
+      id: user.id,
+      user_name: user.user_name,
+      email: user.email,
+
+      role: user.role,
     },
   };
 };
 
 /* ================= GET ALL USERS ================= */
- export const getAllUserService = async (
+export const getAllUserService = async (
   userId: number,
   authUser: AuthUser
 ) => {
-  const user = await User.findByPk(userId);
+
+  const user = await User.findByPk(userId, {
+    attributes: { exclude: ["password", "id"] },
+  });
 
   if (!user) {
-    throw new AppError(message.INVALID("User"), statusCode.UNAUTHORIZED);
+    throw new AppError(message.INVALID("User"), statusCode.NOT_FOUND);
   }
 
-  // Allow only:
-  // 1. Admin
-  // 2. Owner (same user)
   if (
     authUser.role !== USER_ROLES.ADMIN &&
-    authUser.id !== user.id
+    authUser.id !== userId
   ) {
     throw new AppError(message.UNAUTHORIZED, statusCode.UNAUTHORIZED);
   }
@@ -183,7 +188,7 @@ export const updateUserService = async (
     throw new AppError(message.NOT_FOUND("UserId"), statusCode.NOT_FOUND);
   }
 
-  if (authUser.id!==user.id &&authUser.role !== USER_ROLES.ADMIN) {
+  if (authUser.id !== user.id && authUser.role !== USER_ROLES.ADMIN) {
     throw new AppError(message.UNAUTHORIZED, statusCode.NOT_FOUND);
   }
 
@@ -196,26 +201,177 @@ export const updateUserService = async (
 };
 
 //  -----------------------------------User pageggnation - ------------------------------------
-export const getPaginatedUsers
- = async (req: Request, res: Response) => {
-  try {
-        const page = Math.max(parseInt(req.query.page as string) || 1, 1);
-    const limit = Math.max(parseInt(req.query.limit as string) || 10, 1);
-    const offset = (page - 1) * limit;
+type SortBy = "ASC" | "DESC";
 
-    const { count, rows } = await User.findAndCountAll({
-      limit,
-      offset,
-    });
+export const getPaginatedUsers = async (
+  page: number,
+  limit: number,
+  sortBy: SortBy
+) => {
+  const offset = (page - 1) * limit;
+  const order: Order = [["createdAt", sortBy]];
 
-    return res.status(200).json({
-      totalUsers: count,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
-      users: rows,
-    });
+  const { count, rows } = await User.findAndCountAll({
+    limit,
+    offset,
+    attributes: { exclude: ["password", "id"] },
+    order,
+  });
 
-  } catch (error) {
-    operationFailed(error,"Paginated Users")
+  return {
+    totalUsers: count,
+    totalPages: Math.ceil(count / limit),
+    currentPage: page,
+    users: rows,
+  };
+};
+// export const updateUserProfileService = async (
+//   id: number,
+//   updateData: {
+//     user_name?: string;
+//     email?: string;
+//     password?: string;
+//   }
+// ) => {
+//   const user = await db.user.findByPk(id)
+
+//   if (!user) {
+//     throw new AppError(
+//       message.NOT_FOUND("User"),
+//       statusCode.NOT_FOUND
+//     );
+//   }
+
+//   const { user_name, email, password } = updateData;
+
+//   if (!user_name && !email && !password) {
+//     throw new AppError(
+//       ERRORS.message.REQUIRE("At least one field to update"),
+//       ERRORS.statusCode.ALL_FIELDS_REQUIRED
+//     );
+//   }
+
+//   // Check email uniqueness
+//   if (email && email !== user.email) {
+//     const user = await db.user.findOne({ where: { email } });
+//     if (user) {
+//       throw new AppError(
+//         message.CONFLICT("Email"),
+//         statusCode.CONFLICT
+//       );
+//     }
+//   }
+
+//   const dataToUpdate: Partial<IUserAttributes> = {};
+
+//   if (user_name !== undefined) dataToUpdate.user_name = user_name;
+//   if (email !== undefined) dataToUpdate.email = email;
+
+//   if (password !== undefined) {
+//     dataToUpdate.password = await bcrypt.hash(password,10 );
+//   }
+
+//   const updatedUser = await user.update(dataToUpdate);
+
+//   return updatedUser;
+// };
+
+export const updateUserProfileService = async (
+  id: number,
+  updateData: {
+    user_name?: string;
+    email?: string;
+    password?: string;
   }
+) => {
+  const user = await db.user.findByPk(id);
+
+  if (!user) {
+    throw new AppError(
+      message.NOT_FOUND("User"),
+      statusCode.NOT_FOUND
+    );
+  }
+
+  const { user_name, email, password } = updateData;
+
+  if (!user_name && !email && !password) {
+    throw new AppError(
+      message.REQUIRE("At least one field to update"),
+      statusCode.ALL_FIELDS_REQUIRED
+    );
+  }
+
+  // ✅ Fixed: only check email uniqueness if email is actually being updated
+  if (email !== undefined) {
+    const existingUser = await db.user.findOne({ where: { email } });
+
+    if (existingUser && existingUser.id !== id) {
+      throw new AppError(
+        message.CONFLICT("Email"),
+        statusCode.CONFLICT
+      );
+    }
+  }
+
+  const dataToUpdate: Partial<IUserAttributes> = {};
+
+  if (user_name !== undefined) {
+    dataToUpdate.user_name = user_name;
+  }
+  if (email !== undefined) {
+    dataToUpdate.email = email;
+  }
+
+  if (password !== undefined) {
+    dataToUpdate.password = await bcrypt.hash(password, 10);
+  }
+
+  const updatedUser = await user.update(dataToUpdate);
+
+  return updatedUser;
+};
+
+// -------------------------------------------- User-post -comment Paginated----------------------------------------
+
+export const overviewService = async (
+  page: number,
+  limit: number,
+  commentFlag: boolean
+) => {
+
+  const offset = (page - 1) * limit;
+
+  const postInclude: IncludeOptions = {
+    model: Post,
+    as: "postDetails",
+    attributes: { exclude: ["id", "user_id"] },
+  };
+
+  if (commentFlag) {
+    postInclude.include = [
+      {
+        model: Comment,
+        attributes: {
+          exclude: ["id", "user_id", "post_id", "is_guest"],
+        },
+      },
+    ];
+  }
+
+  const users = await User.findAndCountAll({
+    limit,
+    offset,
+    attributes: { exclude: ["password", "id"] },
+    distinct: true,
+    include: [postInclude],
+    order: [["id", "ASC"]],
+  });
+
+  return {
+    totalUsers: users.count,
+    totalPages: Math.ceil(users.count / limit),
+    currentPage: page,
+    data: users.rows,
+  };
 };

@@ -20,8 +20,7 @@ type UserCreationAttributes = Optional<UserAttributes, "id" | "age">;
 
 export class User
   extends Model<UserAttributes, UserCreationAttributes>
-  implements UserAttributes
-{
+  implements UserAttributes {
   declare id: number;
   declare user_name: string;
   declare email: string;

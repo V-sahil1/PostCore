@@ -1,4 +1,5 @@
-import { DataTypes, Model, type Sequelize, Optional, type ModelStatic } from "sequelize";
+import type { Optional } from "sequelize";
+import { DataTypes, Model, type Sequelize, type ModelStatic } from "sequelize";
 
 export interface CommentAttributes {
   id: number;
@@ -12,8 +13,7 @@ export type CommentCreationAttributes = Optional<CommentAttributes, "id">;
 
 export class Comment
   extends Model<CommentAttributes, CommentCreationAttributes>
-  implements CommentAttributes
-{
+  implements CommentAttributes {
   declare id: number;
   declare description: string;
   declare is_guest: boolean;

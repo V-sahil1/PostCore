@@ -7,17 +7,10 @@ const errorSchema = new mongoose.Schema({
   ip: String,
   userAgent: String,
   message: String,
-  errorStack: String,
-  errorType: String,
-  bodyMessage: String,
-  time: {
-    type: Date,
-    default: Date.now
-  }
 }
 , {
 
 });
-export const ErrorModel = mongoose.model("mongoerror", errorSchema)
+export const mongoModel = mongoose.model("Error", errorSchema)
 
 //change

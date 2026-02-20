@@ -10,14 +10,14 @@ const route = Router();
 route.use('/user'/*
     #swagger.tags = ['User']*/, userRouer);
 route.use('/post'
-    /*
+  /*
     #swagger.tags = ['Post']*/, postRouer);
 route.use('/comment'
-   /*
-    #swagger.tags = ['Comment']*/ , commentRouer);
+  /*
+    #swagger.tags = ['Comment']*/, commentRouer);
 route.use('/token'
-    /*
+  /*
   #swagger.tags = ['Auth']*/
-    , tokenRouer);
+  , tokenRouer);
 
 export default route

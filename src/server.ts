@@ -1,4 +1,4 @@
-import express from "express";
+import express from "express"
 import type { Application, Request, Response } from "express";
 import session from "express-session";
 import connectDB from "./config/mongo";
@@ -12,8 +12,11 @@ import swaggerDocument from "./swagger-output.json"
 import { mongoConnect, sqlConnect } from "./config/db.connect";
 import { env } from "./config/env.config";
 import { errorHandler } from "./middleware/error-log";
+import morganMiddleware from "./middleware/morganLogger";
+import { captureResponse } from "./middleware/responseCapture";
 
 const app: Application = express();
+
 const PORT = Number(env.SERVER.PORT);
 
 const startserver = async () => {
@@ -28,7 +31,8 @@ const startserver = async () => {
 }
 
 startserver();
-
+app.use(captureResponse)
+app.use(morganMiddleware)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -45,6 +49,7 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+
 app.use("/", router)
 app.use(errorHandler);
 

@@ -39,7 +39,42 @@
         }
       }
     },
-    "/user/user/{userId}": {
+    "/user/user-post-overview": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "comment",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/user/{userId}": {
       "get": {
         "tags": [
           "User"
@@ -92,6 +127,7 @@
         "tags": [
           "User"
         ],
+        "summary": "Update user profile",
         "description": "",
         "parameters": [
           {
@@ -103,38 +139,56 @@
           {
             "name": "authorization",
             "in": "header",
-            "type": "string"
+            "required": true,
+            "type": "string",
+            "description": "Bearer token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User updated successfully"
           },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "user_name": {
-                  "example": "any"
-                },
-                "email": {
-                  "example": "any"
-                },
-                "password": {
-                  "example": "any"
-                },
-                "age": {
-                  "example": "any"
+          "400": {
+            "description": "At least one field is required"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "p": "Email already in use",
+            "description": "Conflict"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_name": {
+                    "type": "string",
+                    "example": "john_doe"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "john@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "newpassword123"
+                  }
                 }
               }
             }
           }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
         }
       }
     },
-    "/user/paginated": {
+    "/user/": {
       "get": {
         "tags": [
           "User"
@@ -155,21 +209,13 @@
             "name": "limit",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "type": "string"
           }
         ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/post/get": {
-      "get": {
-        "tags": [
-          "Post"
-        ],
-        "description": "",
         "responses": {
           "default": {
             "description": ""
@@ -177,7 +223,30 @@
         }
       }
     },
-    "/post/post": {
+    "/post/": {
+      "get": {
+        "tags": [
+          "Post"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
       "post": {
         "tags": [
           "Post"
@@ -209,7 +278,7 @@
         }
       }
     },
-    "/post/post/{postId}": {
+    "/post/{postId}": {
       "get": {
         "tags": [
           "Post"
@@ -290,7 +359,7 @@
         }
       }
     },
-    "/comment/comment/{postId}": {
+    "/comment/{postId}": {
       "post": {
         "tags": [
           "Comment"
@@ -326,14 +395,30 @@
             "description": ""
           }
         }
-      }
-    },
-    "/comment/all-comment": {
+      },
       "get": {
         "tags": [
           "Comment"
         ],
         "description": "",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -377,9 +462,7 @@
             "description": ""
           }
         }
-      }
-    },
-    "/comment/comment/{commentId}": {
+      },
       "delete": {
         "tags": [
           "Comment"
@@ -485,8 +568,8 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }

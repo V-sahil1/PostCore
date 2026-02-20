@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize';
-import { env, Env } from './env.config';
+import type { Env } from './env.config';
+import { env } from './env.config';
 
 type DBConfig = {
   username: string;

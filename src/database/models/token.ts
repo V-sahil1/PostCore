@@ -1,4 +1,5 @@
-import { DataTypes, Model, type Sequelize, Optional } from "sequelize";
+import type { Optional } from "sequelize";
+import { DataTypes, Model, type Sequelize } from "sequelize";
 
 export interface TokenAttributes {
   id: number;
@@ -9,8 +10,7 @@ export type TokenCreationAttributes = Optional<TokenAttributes, "id">;
 
 export class Token
   extends Model<TokenAttributes, TokenCreationAttributes>
-  implements TokenAttributes
-{
+  implements TokenAttributes {
   declare id: number;
   declare token_value: string;
 }

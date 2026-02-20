@@ -1,25 +1,30 @@
 // src/constants/messages.ts
 
 export const MESSAGES = {
-    SOMETHING_WENT_WRONG: "Something went wrong",
-    INTERNAL_SERVER_ERROR: "Internal server error",
+  SOMETHING_WENT_WRONG: "Something went wrong",
+  INTERNAL_SERVER_ERROR: "Internal server error",
 
-    LOGIN_SUCCESS: "Login successful",
-    REQUIRED: "All fields are required",
+  LOGIN_SUCCESS: "Login successful",
+  REQUIRED: "All fields are required",
 
-    SAVED: "saved successfully",
-    SUCCESS: "Successfull"
+  SAVED: "saved successfully",
+  SUCCESS: "Successfull",
+
+  STATUS_CODE: {
+    SUCCESS: 200
+
+  }
 
 };
 
 export const operationDelete = (params: string): string => {
-    return `${params} Deleted Successfully`;
+  return `${params} Deleted Successfully`;
 };
 export const operationCreate = (params: string): string => {
-    return `${params} Create Successfully`;
+  return `${params} Create Successfully`;
 };
 
 export const oprationUpdate = (params: string):string => {
 
-    return `${params} Update Successfully`
+  return `${params} Update Successfully`
 }

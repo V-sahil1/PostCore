@@ -9,7 +9,7 @@ const processEnv = process.env;
 function getEnvValue(name: string): string {
   const value = processEnv[name];
   if (!value) {
-    throw new AppError(`${ERRORS.message.NOT_FOUND("ENV")}: ${name}`,ERRORS.statusCode.NOT_FOUND);
+    throw new AppError(`${ERRORS.MESSAGES.NOT_FOUND("ENV")}: ${name}`, ERRORS.STATUS_CODE.NOT_FOUND);
   }
   return value;
 }
@@ -39,6 +39,11 @@ export const env = {
   },
   SERVER: {
     PORT: getEnvValue("PORT"),
+
+  },
+
+  LOG: {
+    FILE_LOGGER: getEnvValue("FILE_LOGGER"),
 
   }
 

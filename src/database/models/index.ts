@@ -3,13 +3,14 @@
 
 import fs from "fs";
 import path from "path";
-import { Sequelize, DataTypes, ModelStatic } from "sequelize";
+import type { ModelStatic } from "sequelize";
+import { Sequelize, DataTypes } from "sequelize";
 import { configs } from "../../config/sql";
 import { env } from "../../config/env.config";
-import { User } from "./user";
-import { Post } from "./post";
-import { Token } from "./token";
-import { Comment } from "./comment";
+import type { User } from "./user";
+import type { Post } from "./post";
+import type { Token } from "./token";
+import type { Comment } from "./comment";
 
 const sequelizeConfig = configs[env.NODE_ENV];
 // console.log(sequelizeConfig);
@@ -47,7 +48,7 @@ const sequelize = new Sequelize(
 );
 // console.log(sequelizeConfig.database);
 
-  //Load models
+//Load models
 
 fs.readdirSync(__dirname)
   .filter(
@@ -75,8 +76,8 @@ Object.keys(db).forEach((modelName) => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-    // db.sequelize.sync({
-    //     force:true
-    // })
+// db.sequelize.sync({
+//     force:true
+// })
 
 export default db;

@@ -1,25 +1,28 @@
 'use strict';
 
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    /**
-     * Add seed commands here.
-     *
-     * Example:
-     * await queryInterface.bulkInsert('People', [{
-     *   name: 'John Doe',
-     *   isBetaMember: false
-     * }], {});
-    */
+
+    const comments = [];
+
+    for (let i = 1; i <= 50; i++) {
+
+      const isGuest = Math.random() < 0.4; // 40% guest comments
+
+      comments.push({
+        description: `This is comment number ${i}`,
+        is_guest: isGuest,
+        user_id: isGuest ? null : Math.floor(Math.random() * 10) + 1, // 1–10 if not guest
+        post_id: Math.floor(Math.random() * 6) + 1, // 1–6 always required
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+    }
+
+    return queryInterface.bulkInsert('comments', comments);
   },
 
   async down(queryInterface, Sequelize) {
-    /**
-     * Add commands to revert seed here.
-     *
-     * Example:
-     * await queryInterface.bulkDelete('People', null, {});
-     */
-  }
+    return queryInterface.bulkDelete('comments', null, {});
+  },
 };

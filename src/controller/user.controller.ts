@@ -1,12 +1,13 @@
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import * as userService from "../service/user.service";
-import {  MESSAGES, operationCreate, operationDelete, oprationUpdate } from "../const/message";
+import { MESSAGES, operationCreate, operationDelete, oprationUpdate } from "../const/message";
 import { env } from "../config/env.config";
-import { UserRole } from "../const/user-role";
-import {  sendSuccess } from "../utils/response.util";
-import {  ERRORS, operationFailed } from "../const/error-message";
+import type { UserRole } from "../const/user-role";
+import { sendSuccess } from "../utils/response.util";
+import { ERRORS, globalErrorHandler } from "../const/error-message";
 import { AppError } from "../utils/errorHandler";
+import { log } from "console";
 
 // ----------------------------------------TYPES ----------------------------------------------
 type AuthUser = {
@@ -15,104 +16,20 @@ type AuthUser = {
   email?: string;
 };
 
-const message =ERRORS.message;
-const statusCode = ERRORS.statusCode;
+const message = ERRORS.MESSAGES;
+const statusCode = ERRORS.STATUS_CODE;
 // ---------------------------------------- JWT ----------------------------------------------
 const JWT_SECRET = env.JWT.JWT_SECRET;
 if (!JWT_SECRET) {
-  throw new AppError(message.NOT_FOUND("JWT Token"),statusCode.NOT_FOUND);
+  throw new AppError(message.NOT_FOUND("JWT Token"), statusCode.NOT_FOUND);
 }
-
-// ----------------------------------------REGISTER  ----------------------------------------------
-
-export const register = async (
-  req: Request,
-  res: Response
-): Promise<Response | void> => {
-  try {
-    const { user_name, email, password,  age } = req.body;
-
-    if (!user_name || !email || !password) {
-      // const m =new AppError(MESSAGES.REQUIRED,404)
-      throw new AppError(message.ALL_FIELDS_REQUIRED,statusCode.ALL_FIELDS_REQUIRED);
-    }
-
-    const result = await userService.registerUserService(
-      user_name,
-      email,
-      password,
-      age
-    );
-
-    const token = jwt.sign(
-      {
-        id: result.user.id,
-        email: result.user.email,
-        role: result.user.role,
-      },
-      JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-// console.log(res);
-
-    return sendSuccess(
-      res,
-      200,
-      operationCreate("User"),
-      result.user,
-      token
-    );
-  } catch (error) {
-    // console.log(error)
-    operationFailed(error,"Register User")
-  }
-}
-
-// ----------------------------------------LOGIN  ----------------------------------------------
-
-export const login = async (
-  req: Request,
-  res: Response
-): Promise<Response | void> => {
-  try {
-    const { email, password } = req.body;
-
-    const result = await userService.loginUserService(email, password);
-    if (!email || !password) {
-      // const m =new AppError(MESSAGES.REQUIRED,404)
-      throw new AppError(message.ALL_FIELDS_REQUIRED,statusCode.ALL_FIELDS_REQUIRED);
-    }
-
-    const token = jwt.sign(
-      {
-        id: result.user.id,
-        email: result.user.email,
-        role: result.user.role,
-      },
-      JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-    //  console.log(result.user);
-    return sendSuccess(
-      res,
-      200,
-      MESSAGES.LOGIN_SUCCESS,
-      result.user,
-      token
-    );
-  } catch (error) {
-    // console.log(error)
-
-   operationFailed(error, "login User!");
-  }
-};
 
 // ---------------------------------------- DELETE USER  ----------------------------------------------
 
 export const deleteUser = async (
   req: Request,
   res: Response
-): Promise<Response | void>=> {
+): Promise<Response | void> => {
   try {
     const authUser = req.user as AuthUser;
     const userId = Number(req.params.userId);
@@ -122,14 +39,13 @@ export const deleteUser = async (
 
     return sendSuccess(
       res,
-      200,
-      operationDelete("User"),
+      MESSAGES.STATUS_CODE.SUCCESS, operationDelete("User"),
       result
 
     );
     // res.status(200).json(result);
   } catch (error) {
-    operationFailed(error,"Delete User")
+    globalErrorHandler(error, "Delete User")
   }
 };
 
@@ -140,13 +56,15 @@ export const getUser = async (
   res: Response
 ): Promise<Response | void> => {
   try {
-     const authUser = req.user as AuthUser;
-     const userId = Number(req.params.userId);
+    const authUser = req.user as AuthUser;
+    const userId = Number(req.params.userId);
 
-    const result = await userService.getAllUserService(userId,authUser);
-    return   sendSuccess(
+    const result = await userService.getAllUserService(userId, authUser);
+    console.log(result);
+
+    return sendSuccess(
       res,
-      200,
+      MESSAGES.STATUS_CODE.SUCCESS,
       MESSAGES.SUCCESS,
       result,
 
@@ -154,7 +72,7 @@ export const getUser = async (
 
   } catch (error: unknown) {
 
-  operationFailed(error, "Get User!");
+    globalErrorHandler(error, "Get User!");
   }
 };
 
@@ -167,20 +85,186 @@ export const updateUser = async (
   try {
     const authUser = req.user as AuthUser;
     if (!authUser) {
-     throw new AppError(message.UNAUTHORIZED,statusCode.UNAUTHORIZED);
+      throw new AppError(message.UNAUTHORIZED, statusCode.UNAUTHORIZED);
     }
 
     const id = Number(req.params.userId);
     const { user_name, email, password, age } = req.body;
 
-    const data = await userService.updateUserService(id,authUser, user_name, email, password, age);
+    const data = await userService.updateUserService(id, authUser, user_name, email, password, age);
     return sendSuccess(
       res,
-      200,
-     oprationUpdate("User"),
+      MESSAGES.STATUS_CODE.SUCCESS,
+      oprationUpdate("User"),
       data
 
     );
     // res.status(200).json(data);
-  } catch (error: unknown) { operationFailed(error, "Update User!"); }
+  } catch (error: unknown) {
+    globalErrorHandler(error, "Update User!");
+  }
 };
+
+export const updateUserProfile = async (
+  req: Request,
+  res: Response
+): Promise<Response | void> => {
+  try {
+    const authenticatedUser = req.user as AuthUser;
+
+    if (!authenticatedUser) {
+      throw new AppError(
+        message.UNAUTHORIZED,
+        statusCode.UNAUTHORIZED
+      );
+    }
+
+    const id = Number(req.params.userId);
+
+    const updatedUser = await userService.updateUserProfileService(
+      id,
+      req.body
+    );
+
+    const { password: _, ...userWithoutPassword } = updatedUser.toJSON();
+
+    return sendSuccess(
+      res,
+      MESSAGES.STATUS_CODE.SUCCESS,
+      oprationUpdate("User"),
+      userWithoutPassword
+    );
+  } catch (error) {
+    // ✅ Fixed: return the error response so it's actually sent
+    return globalErrorHandler(error, "Update User");
+  }
+};
+
+export const overview = async (
+  req: Request,
+  res: Response
+): Promise<Response | void> => {
+  try {
+
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
+    const commentFlag = req.query.comment === "true";
+
+    const paginatedResult = await userService.overviewService(page, limit, commentFlag);
+
+    return sendSuccess(
+      res,
+      MESSAGES.STATUS_CODE.SUCCESS,
+      MESSAGES.SUCCESS,
+      paginatedResult
+    )
+
+  } catch (error) {
+    return globalErrorHandler(error, "Get Paginated Users");
+  }
+};
+
+export const getPaginated = async (req: Request, res: Response) => {
+  try {
+    const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+    const limit = Math.max(parseInt(req.query.limit as string) || 10, 1);
+    const sortBy = (req.query.orderBy as "ASC" | "DESC") || "ASC";
+
+    const paginate = await userService.getPaginatedUsers(page, limit, sortBy);
+
+    return sendSuccess(
+      res,
+      MESSAGES.STATUS_CODE.SUCCESS,
+      MESSAGES.SUCCESS,
+      paginate
+    );
+  } catch (error) {
+    globalErrorHandler(error, "Paginated Users");
+  }
+};
+// ----------------------------------------REGISTER  ----------------------------------------------
+
+// export const register = async (
+//   req: Request,
+//   res: Response
+// ): Promise<Response | void> => {
+//   try {
+//     const { user_name, email, password,  age } = req.body;
+
+//     if (!user_name || !email || !password) {
+//       // const m =new AppError(MESSAGES.REQUIRED,404)
+//       throw new AppError(message.ALL_FIELDS_REQUIRED, statusCode.ALL_FIELDS_REQUIRED);
+//     }
+
+//     const result = await userService.registerUserService(
+//       user_name,
+//       email,
+//       password,
+//       age
+//     );
+
+//     const token = jwt.sign(
+//       {
+//         id: result.user.id,
+//         email: result.user.email,
+//         role: result.user.role,
+//       },
+//       JWT_SECRET,
+//       { expiresIn: "1d" }
+//     );
+//     const { id, ...userWithoutId } = result.user;
+//     // console.log(res);
+
+//     return sendSuccess(
+//       res,
+//       MESSAGES.STATUS_CODE.SUCCESS,
+//       operationCreate("User"),
+//       userWithoutId,
+//       token
+//     );
+//   } catch (error) {
+//     // console.log(error)
+//     globalErrorHandler(error, "Register User")
+//   }
+// }
+
+// // ----------------------------------------LOGIN  ----------------------------------------------
+
+// export const login = async (
+//   req: Request,
+//   res: Response
+// ): Promise<Response | void> => {
+//   try {
+//     const { email, password } = req.body;
+
+//     const result = await userService.loginUserService(email, password);
+//     if (!email || !password) {
+//       // const m =new AppError(MESSAGES.REQUIRED,404)
+//       throw new AppError(message.ALL_FIELDS_REQUIRED, statusCode.ALL_FIELDS_REQUIRED);
+//     }
+
+//     const token = jwt.sign(
+//       {
+//         id: result.user.id,
+//         email: result.user.email,
+//         role: result.user.role,
+//       },
+//       JWT_SECRET,
+//       { expiresIn: "1d" }
+//     );
+//     const { id, ...userWithoutId } = result.user;
+
+//     //  console.log(result.user);
+//     return sendSuccess(
+//       res,
+//       MESSAGES.STATUS_CODE.SUCCESS,
+//       MESSAGES.LOGIN_SUCCESS,
+//       userWithoutId,
+//       token
+//     );
+//   } catch (error) {
+//     // console.log(error)
+
+//     globalErrorHandler(error, "login User!");
+//   }
+// };
