@@ -107,7 +107,7 @@ export const postDelete = async (
 };
 
 // -------------------------------------------- GET PaginatedPost- ------------------------------------
-export const m,,pagginationPost = async (
+export const pagginationPost = async (
   req: Request,
   res: Response
 ): Promise<Response | void> => {
