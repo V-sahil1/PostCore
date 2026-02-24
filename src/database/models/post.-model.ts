@@ -20,6 +20,7 @@ export class Post
   declare id: number;
   declare title: string;
   declare user_id: number;
+  declare createdAt: Date;
 
   static associate(models: Record<string, ModelStatic<Model>>) {
     if (models.user) {

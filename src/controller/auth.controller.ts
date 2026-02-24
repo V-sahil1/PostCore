@@ -1,10 +1,9 @@
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import * as userService from "../service/user.service";
-import { MESSAGES, operationCreate } from "../const/message";
+import { SUCCESSMESSAGES, operationCreate, globalErrorHandler, ERRORS } from "../const/message";
 import { env } from "../config/env.config";
 import { sendSuccess } from "../utils/response.util";
-import { ERRORS, globalErrorHandler } from "../const/error-message";
 import { AppError } from "../utils/errorHandler";
 // ----------------------------------------TYPES ----------------------------------------------
 
@@ -45,8 +44,8 @@ export const login = async (
     //  console.log(result.user);
     return sendSuccess(
       res,
-      MESSAGES.STATUS_CODE.SUCCESS,
-      MESSAGES.LOGIN_SUCCESS,
+      SUCCESSMESSAGES.STATUS_CODE.SUCCESS,
+      SUCCESSMESSAGES.LOGIN_SUCCESS,
       userWithoutId,
       token
     );
@@ -91,7 +90,7 @@ export const register = async (
 
     return sendSuccess(
       res,
-      MESSAGES.STATUS_CODE.SUCCESS,
+      SUCCESSMESSAGES.STATUS_CODE.SUCCESS,
       operationCreate("User"),
       userWithoutId,
       token

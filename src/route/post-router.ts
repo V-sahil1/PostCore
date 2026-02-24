@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { creatpost, getpostById, postDelete, postpaggination, updatePost } from "../controller/post.controller";
+import { creatPost, postDelete, updatePost, pagginationPost, getPostById } from "../controller/post.controller";
 import { authenticateJWT } from "../middleware/jwt";
 import { createpostSchema } from "../validator/joi";
 import validate from "../middleware/validateSchema";
@@ -7,11 +7,11 @@ import validate from "../middleware/validateSchema";
 
 const router = Router();
 
-router.get('/', postpaggination)
+router.get('/', pagginationPost)
 
-router.post('/', authenticateJWT, validate(createpostSchema), creatpost);
+router.post('/', authenticateJWT, validate(createpostSchema), creatPost);
 //-------------------------------------------------------------------get post
-router.get('/:postId', getpostById)
+router.get('/:postId', getPostById)
 
 router.patch('/:postId', authenticateJWT, updatePost)
 

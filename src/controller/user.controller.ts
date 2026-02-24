@@ -1,20 +1,18 @@
 import type { Request, Response } from "express";
-import jwt from "jsonwebtoken";
 import * as userService from "../service/user.service";
-import { MESSAGES, operationCreate, operationDelete, oprationUpdate } from "../const/message";
+import { SUCCESSMESSAGES, operationDelete, oprationUpdate, ERRORS, globalErrorHandler } from "../const/message";
 import { env } from "../config/env.config";
-import type { UserRole } from "../const/user-role";
+
 import { sendSuccess } from "../utils/response.util";
-import { ERRORS, globalErrorHandler } from "../const/error-message";
 import { AppError } from "../utils/errorHandler";
-import { log } from "console";
+import type { AuthUser } from "../Interface/type";
 
 // ----------------------------------------TYPES ----------------------------------------------
-type AuthUser = {
-  id: number;
-  role?: UserRole;
-  email?: string;
-};
+// type AuthUser = {
+//   id: number;
+//   role?: UserRole;
+//   email?: string;
+// };
 
 const message = ERRORS.MESSAGES;
 const statusCode = ERRORS.STATUS_CODE;
@@ -39,7 +37,7 @@ export const deleteUser = async (
 
     return sendSuccess(
       res,
-      MESSAGES.STATUS_CODE.SUCCESS, operationDelete("User"),
+      SUCCESSMESSAGES.STATUS_CODE.SUCCESS, operationDelete("User"),
       result
 
     );
@@ -64,8 +62,8 @@ export const getUser = async (
 
     return sendSuccess(
       res,
-      MESSAGES.STATUS_CODE.SUCCESS,
-      MESSAGES.SUCCESS,
+      SUCCESSMESSAGES.STATUS_CODE.SUCCESS,
+      SUCCESSMESSAGES.SUCCESS,
       result,
 
     );
@@ -76,34 +74,7 @@ export const getUser = async (
   }
 };
 
-// ---------------------------------------- UPDATE POST  ----------------------------------------------
-
-export const updateUser = async (
-  req: Request,
-  res: Response
-): Promise<Response | void> => {
-  try {
-    const authUser = req.user as AuthUser;
-    if (!authUser) {
-      throw new AppError(message.UNAUTHORIZED, statusCode.UNAUTHORIZED);
-    }
-
-    const id = Number(req.params.userId);
-    const { user_name, email, password, age } = req.body;
-
-    const data = await userService.updateUserService(id, authUser, user_name, email, password, age);
-    return sendSuccess(
-      res,
-      MESSAGES.STATUS_CODE.SUCCESS,
-      oprationUpdate("User"),
-      data
-
-    );
-    // res.status(200).json(data);
-  } catch (error: unknown) {
-    globalErrorHandler(error, "Update User!");
-  }
-};
+// ---------------------------------------- UPDATE USER  ----------------------------------------------
 
 export const updateUserProfile = async (
   req: Request,
@@ -119,28 +90,27 @@ export const updateUserProfile = async (
       );
     }
 
-    const id = Number(req.params.userId);
+    const userid = Number(req.params.userId);
 
     const updatedUser = await userService.updateUserProfileService(
-      id,
+      userid,
       req.body
     );
 
-    const { password: _, ...userWithoutPassword } = updatedUser.toJSON();
+    const { password: _, id, ...userWithoutPassword } = updatedUser.toJSON();
 
     return sendSuccess(
       res,
-      MESSAGES.STATUS_CODE.SUCCESS,
+      SUCCESSMESSAGES.STATUS_CODE.SUCCESS,
       oprationUpdate("User"),
       userWithoutPassword
     );
   } catch (error) {
-    // ✅ Fixed: return the error response so it's actually sent
     return globalErrorHandler(error, "Update User");
   }
 };
 
-export const overview = async (
+export const getUserPostsWithComments = async (
   req: Request,
   res: Response
 ): Promise<Response | void> => {
@@ -149,13 +119,15 @@ export const overview = async (
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 5;
     const commentFlag = req.query.comment === "true";
-
-    const paginatedResult = await userService.overviewService(page, limit, commentFlag);
+    const postFlag = req.query.post === "true";
+    const sortBy = (req.query.orderBy as "ASC" | "DESC") || "ASC";
+    const { minAge, maxAge } = req.body;
+    const paginatedResult = await userService.getUserPostCommentService(page, limit, commentFlag, postFlag, sortBy, minAge, maxAge);
 
     return sendSuccess(
       res,
-      MESSAGES.STATUS_CODE.SUCCESS,
-      MESSAGES.SUCCESS,
+      SUCCESSMESSAGES.STATUS_CODE.SUCCESS,
+      SUCCESSMESSAGES.SUCCESS,
       paginatedResult
     )
 
@@ -170,12 +142,14 @@ export const getPaginated = async (req: Request, res: Response) => {
     const limit = Math.max(parseInt(req.query.limit as string) || 10, 1);
     const sortBy = (req.query.orderBy as "ASC" | "DESC") || "ASC";
 
-    const paginate = await userService.getPaginatedUsers(page, limit, sortBy);
+    const { minAge, maxAge } = req.body;
+
+    const paginate = await userService.getPaginatedUsers(page, limit, sortBy, minAge, maxAge);
 
     return sendSuccess(
       res,
-      MESSAGES.STATUS_CODE.SUCCESS,
-      MESSAGES.SUCCESS,
+      SUCCESSMESSAGES.STATUS_CODE.SUCCESS,
+      SUCCESSMESSAGES.SUCCESS,
       paginate
     );
   } catch (error) {
@@ -266,5 +240,32 @@ export const getPaginated = async (req: Request, res: Response) => {
 //     // console.log(error)
 
 //     globalErrorHandler(error, "login User!");
+//   }
+// };
+
+// export const updateUser = async (
+//   req: Request,
+//   res: Response
+// ): Promise<Response | void> => {
+//   try {
+//     const authUser = req.user as AuthUser;
+//     if (!authUser) {
+//       throw new AppError(message.UNAUTHORIZED, statusCode.UNAUTHORIZED);
+//     }
+
+//     const id = Number(req.params.userId);
+//     const { user_name, email, password, age } = req.body;
+
+//     const data = await userService.updateUserService(id, authUser, user_name, email, password, age);
+//     return sendSuccess(
+//       res,
+//       MESSAGES.STATUS_CODE.SUCCESS,
+//       oprationUpdate("User"),
+//       data
+
+//     );
+//     // res.status(200).json(data);
+//   } catch (error: unknown) {
+//     globalErrorHandler(error, "Update User!");
 //   }
 // };

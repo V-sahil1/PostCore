@@ -1,8 +1,7 @@
 import type { Request, Response } from "express";
 import * as tokenService from "../service/token.service";
-import { MESSAGES } from "../const/message";
+import { SUCCESSMESSAGES, ERRORS, globalErrorHandler } from "../const/message";
 import { sendSuccess } from "../utils/response.util";
-import { ERRORS, globalErrorHandler } from "../const/error-message";
 import { AppError } from "../utils/errorHandler";
 
 // ---------------------------------------- SAVE TOKEN  ----------------------------------------------
@@ -10,7 +9,7 @@ import { AppError } from "../utils/errorHandler";
 export const saveToken = async (
   req: Request,
   res: Response
-): Promise<Response|void> => {
+): Promise<Response | void> => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -25,8 +24,8 @@ export const saveToken = async (
     // console.log(result);
     return sendSuccess(
       res,
-      MESSAGES.STATUS_CODE.SUCCESS,
-      MESSAGES.SAVED,
+      SUCCESSMESSAGES.STATUS_CODE.SUCCESS,
+      SUCCESSMESSAGES.SAVED,
       result
     )
     //  res.status(201).json(result);

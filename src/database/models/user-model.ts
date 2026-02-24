@@ -5,7 +5,7 @@ import {
   type ModelStatic,
   type Optional,
 } from "sequelize";
-import { USER_ROLES, type UserRole } from "../../const/user-role";
+import { USER_ROLES, type UserRole } from "../../const/enum";
 
 export interface UserAttributes {
   id?: number;

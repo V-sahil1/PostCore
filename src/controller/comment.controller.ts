@@ -1,31 +1,27 @@
 import type { Request, Response } from "express";
 import * as commentService from "../service/comment.service";
-import { MESSAGES, operationCreate, operationDelete, oprationUpdate } from "../const/message";
+import { SUCCESSMESSAGES, operationCreate, operationDelete, oprationUpdate, ERRORS, globalErrorHandler } from "../const/message";
 import { sendSuccess } from "../utils/response.util";
-import { ERRORS, globalErrorHandler } from "../const/error-message";
 import { AppError } from "../utils/errorHandler";
-
-type AuthUser = { id: number; role?: string };
-
-const message = MESSAGES.STATUS_CODE;
+import type { AuthUser } from "../Interface/type";
 
 /* ================= GET COMMENTS ================= */
-export const getcomment = async (
+export const getComment = async (
   _req: Request,
   res: Response
 ): Promise<Response> => {
   const data = await commentService.getAllCommentsService();
   return sendSuccess(
     res,
-    message.SUCCESS,
-    MESSAGES.SUCCESS,
+    SUCCESSMESSAGES.STATUS_CODE.SUCCESS,
+    SUCCESSMESSAGES.SUCCESS,
     data
 
   )
 };
 
 /* ================= CREATE COMMENT ================= */
-export const comment = async (
+export const createComment = async (
   req: Request,
   res: Response
 ): Promise<Response | void> => {
@@ -42,7 +38,7 @@ export const comment = async (
 
     return sendSuccess(
       res,
-      message.SUCCESS,
+      SUCCESSMESSAGES.STATUS_CODE.SUCCESS,
       operationCreate("Comment"),
       result
 
@@ -69,7 +65,7 @@ export const deleteComment = async (
     const result = await commentService.deleteCommentService(commentId, user);
     return sendSuccess(
       res,
-      message.SUCCESS,
+      SUCCESSMESSAGES.STATUS_CODE.SUCCESS,
       operationDelete("Comoment"),
       result
 
@@ -103,7 +99,7 @@ export const updateComment = async (
 
     return sendSuccess(
       res,
-      message.SUCCESS,
+      SUCCESSMESSAGES.STATUS_CODE.SUCCESS,
       oprationUpdate("Comment"),
       data
 
@@ -137,8 +133,8 @@ export const getCommentsByPost = async (
 
     return sendSuccess(
       res,
-      message.SUCCESS,
-      MESSAGES.SUCCESS,
+      SUCCESSMESSAGES.STATUS_CODE.SUCCESS,
+      SUCCESSMESSAGES.SUCCESS,
       data
     )
 

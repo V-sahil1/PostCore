@@ -23,6 +23,7 @@ export default defineConfig([
       "src/seeders/**",
       "**/migrations/**",
       "**/seeders/**",
+          "src/config/config.js",
     ],
   },
 

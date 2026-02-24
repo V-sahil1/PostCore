@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { ERRORS } from "../const/error-message";
+import { ERRORS } from "../const/message";
 import { AppError } from "../utils/errorHandler";
 
 export type Env = "development" | "test" | "production";

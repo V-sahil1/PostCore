@@ -7,10 +7,10 @@ import type { ModelStatic } from "sequelize";
 import { Sequelize, DataTypes } from "sequelize";
 import { configs } from "../../config/sql";
 import { env } from "../../config/env.config";
-import type { User } from "./user";
-import type { Post } from "./post";
-import type { Token } from "./token";
-import type { Comment } from "./comment";
+import type { User } from "./user-model";
+import type { Post } from "./post.-model";
+import type { Token } from "./token-model";
+import type { Comment } from "./comment-model";
 
 const sequelizeConfig = configs[env.NODE_ENV];
 // console.log(sequelizeConfig);

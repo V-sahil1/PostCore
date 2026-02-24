@@ -1,4 +1,4 @@
-import { ERRORS } from "../const/error-message";
+import { ERRORS } from "../const/message";
 import db from "../database/models";
 import { AppError } from "../utils/errorHandler";
 

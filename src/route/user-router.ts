@@ -1,25 +1,27 @@
 import { Router } from "express";
 
-import { deleteUser, getPaginated, getUser, overview, updateUserProfile } from "../controller/user.controller";
+import { deleteUser, getPaginated, getUser, getUserPostsWithComments, updateUserProfile } from "../controller/user.controller";
 
 import { authenticateJWT } from "../middleware/jwt";
 import { updateSchema } from "../validator/joi";
 import validate from "../middleware/validateSchema";
-import { getPaginatedUsers } from "../service/user.service";
+
 // import {  } from "../../controller/route";
 
 const router = Router();
 
 router.get(
-  "/user-post-overview", authenticateJWT, overview
+  "/user-post-comment", authenticateJWT, getUserPostsWithComments
+);
+// getPaginated
+router.get(
+  "/", authenticateJWT, getPaginated
 );
 
 router.get(
   "/:userId", authenticateJWT, getUser
 );
-router.get(
-  "/", authenticateJWT, getPaginated
-);
+
 router.delete('/:userId', authenticateJWT, deleteUser);
 
 router.patch('/:userId'

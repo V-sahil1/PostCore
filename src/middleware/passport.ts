@@ -3,7 +3,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
 import db from "../database/models";
 
-import { ERRORS } from "../const/error-message";
+import { ERRORS } from "../const/message";
 
 const User = db.user;
 const message = ERRORS.MESSAGES;

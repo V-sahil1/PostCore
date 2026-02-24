@@ -39,7 +39,7 @@
         }
       }
     },
-    "/user/user-post-overview": {
+    "/user/user-post-comment": {
       "get": {
         "tags": [
           "User"
@@ -63,6 +63,41 @@
           },
           {
             "name": "comment",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/user/": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "orderBy",
             "in": "query",
             "type": "string"
           }
@@ -184,41 +219,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/user/": {
-      "get": {
-        "tags": [
-          "User"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "orderBy",
-            "in": "query",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
           }
         }
       }
@@ -488,7 +488,7 @@
         }
       }
     },
-    "/token/token": {
+    "/auth/token": {
       "post": {
         "tags": [
           "Auth"
@@ -508,7 +508,7 @@
         }
       }
     },
-    "/token/register": {
+    "/auth/register": {
       "post": {
         "tags": [
           "Auth"
@@ -544,7 +544,7 @@
         }
       }
     },
-    "/token/login": {
+    "/auth/login": {
       "post": {
         "tags": [
           "Auth"

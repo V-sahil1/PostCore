@@ -1,7 +1,7 @@
 //  import mongoose from "mongoose";
 import { config } from "dotenv";
 import { env } from "./env.config";
-import { ERRORS } from "../const/error-message";
+import { ERRORS } from "../const/message";
 import { AppError } from "../utils/errorHandler";
 
 config();

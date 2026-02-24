@@ -15,7 +15,7 @@ route.use('/post'
 route.use('/comment'
   /*
     #swagger.tags = ['Comment']*/, commentRouer);
-route.use('/token'
+route.use('/auth'
   /*
   #swagger.tags = ['Auth']*/
   , tokenRouer);

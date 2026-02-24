@@ -1,34 +1,17 @@
 import db from "../database/models";
 import bcrypt from "bcrypt";
-import { MESSAGES, operationCreate, operationDelete } from "../const/message";
-import type { UserRole } from "../const/user-role";
-import { USER_ROLES } from "../const/user-role";
+import { SUCCESSMESSAGES, operationCreate, operationDelete, ERRORS } from "../const/message";
+import { USER_ROLES } from "../const/enum";
 import { AppError } from "../utils/errorHandler";
-import { ERRORS, globalErrorHandler } from "../const/error-message";
-import type { IncludeOptions } from "sequelize";
-import { Order } from "sequelize";
-// import { User } from "../database/models/user";
+import { type IncludeOptions, type WhereOptions, Op, type Order } from "sequelize";
 
+import type { AuthUser, IUserAttributes } from "../Interface/type"
 const User = db.user;
 const Post = db.post;
 const Comment = db.comment;
-interface IUserAttributes {
-  id: number;
-  user_name: string;
-  email: string;
-  password: string;
-  role: UserRole;
-  age?: number;
-}
 
 const message = ERRORS.MESSAGES;
 const statusCode = ERRORS.STATUS_CODE;
-type AuthUser = {
-  id: number;
-  role?: UserRole;
-};
-
-type IdRow = { id: number };
 
 /* ================= DELETE USER ================= */
 export const deleteUserService = async (
@@ -48,29 +31,10 @@ export const deleteUserService = async (
     throw new AppError(message.UNAUTHORIZED, statusCode.UNAUTHORIZED);
   }
 
-  const comments = await Comment.findAll({
-    where: { user_id: targetUserId },
-  });
+  await Comment.destroy({ where: { user_id: targetUserId } });
 
-  const commentIds = comments.map(
-    (item: unknown) => (item as IdRow).id
-  );
-
-  if (commentIds.length > 0) {
-    await Comment.destroy({ where: { id: commentIds } });
-  }
-
-  const posts = await Post.findAll({
-    where: { user_id: targetUserId },
-  });
-
-  const postIds = posts.map(
-    (item: unknown) => (item as IdRow).id
-  );
-
-  if (postIds.length > 0) {
-    await Post.destroy({ where: { id: postIds } });
-  }
+  await Post.destroy({ where: { user_id: targetUserId } });
+  // }
 
   await User.destroy({ where: { id: targetUserId } });
 
@@ -118,7 +82,7 @@ export const registerUserService = async (
 /* ================= LOGIN ================= */
 export const loginUserService = async (email: string, password: string) => {
   if (!email || !password) {
-    throw new AppError(MESSAGES.REQUIRED, 404);
+    throw new AppError(message.ALL_FIELDS_REQUIRED, 404);
   }
 
   const user = await db.user.findOne({ where: { email } });
@@ -126,20 +90,13 @@ export const loginUserService = async (email: string, password: string) => {
     throw new AppError(message.INVALID("Email"), statusCode.UNAUTHORIZED);
   }
 
-  // const foundUser = user as unknown as {
-  //   id: number;
-  //   email: string;
-  //   role: UserRole;
-  //   password: string;
-  // };
-
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     throw new AppError(message.INVALID("Password"), statusCode.UNAUTHORIZED);
   }
 
   return {
-    message: MESSAGES.LOGIN_SUCCESS,
+    message: SUCCESSMESSAGES.LOGIN_SUCCESS,
     user: {
       id: user.id,
       user_name: user.user_name,
@@ -185,15 +142,11 @@ export const updateUserService = async (
   const user = await User.findByPk(userId);
   if (!user) {
     // throw new Error("Post not found");
-    throw new AppError(message.NOT_FOUND("UserId"), statusCode.NOT_FOUND);
+    throw new AppError(message.NOT_FOUND("User"), statusCode.NOT_FOUND);
   }
 
   if (authUser.id !== user.id && authUser.role !== USER_ROLES.ADMIN) {
     throw new AppError(message.UNAUTHORIZED, statusCode.NOT_FOUND);
-  }
-
-  if (!user) {
-    throw new AppError(message.NOT_FOUND("User Not Found!"), statusCode.NOT_FOUND);
   }
 
   await user.update({ user_name, email, password, age });
@@ -206,16 +159,30 @@ type SortBy = "ASC" | "DESC";
 export const getPaginatedUsers = async (
   page: number,
   limit: number,
-  sortBy: SortBy
+  sortBy: SortBy,
+  minAge: number,
+  maxAge: number
+
 ) => {
   const offset = (page - 1) * limit;
   const order: Order = [["createdAt", sortBy]];
 
+  const where: WhereOptions = {};
+
+  // Age filter
+  if (minAge && maxAge) {
+    where.age = { [Op.between]: [minAge, maxAge] };
+  } else if (minAge) {
+    where.age = { [Op.gte]: minAge };
+  } else if (maxAge) {
+    where.age = { [Op.lte]: maxAge };
+  }
   const { count, rows } = await User.findAndCountAll({
     limit,
     offset,
     attributes: { exclude: ["password", "id"] },
     order,
+    where,
   });
 
   return {
@@ -225,6 +192,7 @@ export const getPaginatedUsers = async (
     users: rows,
   };
 };
+
 // export const updateUserProfileService = async (
 //   id: number,
 //   updateData: {
@@ -334,29 +302,51 @@ export const updateUserProfileService = async (
 
 // -------------------------------------------- User-post -comment Paginated----------------------------------------
 
-export const overviewService = async (
+export const getUserPostCommentService = async (
   page: number,
   limit: number,
-  commentFlag: boolean
+  commentFlag: boolean,
+  postFlag: boolean,
+  sortBy: SortBy,
+  minAge?: number,
+  maxAge?: number
 ) => {
-
   const offset = (page - 1) * limit;
 
-  const postInclude: IncludeOptions = {
-    model: Post,
-    as: "postDetails",
-    attributes: { exclude: ["id", "user_id"] },
-  };
+  const includeOptions: IncludeOptions[] = [];
+  const order: Order = [["createdAt", sortBy]];
 
-  if (commentFlag) {
-    postInclude.include = [
-      {
-        model: Comment,
-        attributes: {
-          exclude: ["id", "user_id", "post_id", "is_guest"],
+  const where: WhereOptions = {};
+
+  // ✅ Age filter (safe check)
+  if (minAge !== undefined && maxAge !== undefined) {
+    where.age = { [Op.between]: [minAge, maxAge] };
+  } else if (minAge !== undefined) {
+    where.age = { [Op.gte]: minAge };
+  } else if (maxAge !== undefined) {
+    where.age = { [Op.lte]: maxAge };
+  }
+
+  // ✅ Post & Comment Include
+  if (postFlag) {
+    const postInclude: IncludeOptions = {
+      model: Post,
+      as: "postDetails",
+      attributes: { exclude: ["id", "user_id"] },
+    };
+
+    if (commentFlag) {
+      postInclude.include = [
+        {
+          model: Comment,
+          attributes: {
+            exclude: ["id", "user_id", "post_id", "is_guest"],
+          },
         },
-      },
-    ];
+      ];
+    }
+
+    includeOptions.push(postInclude);
   }
 
   const users = await User.findAndCountAll({
@@ -364,8 +354,9 @@ export const overviewService = async (
     offset,
     attributes: { exclude: ["password", "id"] },
     distinct: true,
-    include: [postInclude],
-    order: [["id", "ASC"]],
+    include: includeOptions,
+    order, // ✅ using dynamic order now
+    where,
   });
 
   return {
@@ -375,3 +366,25 @@ export const overviewService = async (
     data: users.rows,
   };
 };
+
+// const comments = await Comment.findAll({
+//   where: { user_id: targetUserId },
+// });
+
+// const commentIds = comments.map(
+//   (item: unknown) => (item as IdRow).id
+// );
+
+// if (targetUserId.length > 0) {
+
+//
+
+// const posts = await Post.findAll({
+//   where: { user_id: targetUserId },
+// });
+
+// const postIds = posts.map(
+//   (item: unknown) => (item as IdRow).id
+// );
+
+// if (postIds.length > 0) {

@@ -1,18 +1,16 @@
-import { model } from "mongoose";
-import { ERRORS } from "../const/error-message";
-import { operationCreate, operationDelete } from "../const/message";
-import { comment } from "../controller/comment.controller";
+import { operationCreate, operationDelete, ERRORS } from "../const/message";
+// import { comment } from "../controller/comment.controller";
 import db from "../database/models";
 import { AppError } from "../utils/errorHandler";
-import { User } from "../database/models/user";
-import { USER_ROLES } from "../const/user-role";
-
+import { User } from "../database/models/user-model";
+import { USER_ROLES } from "../const/enum";
+import type { AuthUser } from "../Interface/type";
 const Comment = db.comment;
 const Post = db.post;
+
 const message = ERRORS.MESSAGES;
 const statusCode = ERRORS.STATUS_CODE;
 
-type AuthUser = { id: number; role?: string };
 type CommentRow = { user_id: number };
 
 /* ================= GET ALL COMMENTS ================= */
@@ -114,7 +112,7 @@ export const getCommentsByPostService = async (
   }
 
   const { count, rows } = await db.comment.findAndCountAll({
-    where: { post_id: postId }, // ✅ filter by post
+    where: { post_id: postId },
     limit,
     offset,
     order: [["createdAt", "DESC"]],
@@ -132,7 +130,7 @@ export const getCommentsByPostService = async (
   console.log(rows);
   console.log(count);
 
-  const comments = rows.map((comment :(typeof rows)[0]) => {
+  const comments = rows.map((comment: (typeof rows)[0]) => {
     const { user, ...rest } = comment.toJSON();
     return {
       ...rest,

@@ -1,19 +1,14 @@
-
-import { ERRORS, } from "../const/error-message";
-import { operationCreate, operationDelete } from "../const/message";
+import { operationCreate, operationDelete, ERRORS } from "../const/message";
 import db from "../database/models";
 import { AppError } from "../utils/errorHandler";
-import { USER_ROLES } from "../const/user-role";
-
+import { USER_ROLES } from "../const/enum";
+import type { AuthUser, IdRow } from "../Interface/type"
+import { type Includeable, Op } from "sequelize";
 const Post = db.post;
 const User = db.user;
 const Comment = db.comment;
 const message = ERRORS.MESSAGES;
 const statusCode = ERRORS.STATUS_CODE
-
-type AuthUser = { id: number; role?: string };
-type IdRow = { id: number };
-type PostRow = { user_id: number };
 
 /* ================= CREATE POST ================= */
 export const createPostService = async (
@@ -86,7 +81,12 @@ export const updatePostService = async (
 /* ================= GET POST BY ID ================= */
 export const getPostByIdService = async (id: number) => {
   const post = await Post.findByPk(id, {
-    attributes: { exclude: ["id", "user_id"] }
+    attributes: { exclude: ["id", "user_id"] },
+    include: {
+      model: Comment,
+      attributes: { exclude: ["id", "user_id", "is_guest", "post_id"] },
+    },
+
   });
   if (!post) {
     throw new AppError(message.NOT_FOUND("Post"), statusCode.NOT_FOUND)
@@ -104,9 +104,7 @@ export const deletePostService = async (
     throw new AppError(message.NOT_FOUND("Post"), statusCode.NOT_FOUND);
   }
 
-  const postRow = post as unknown as PostRow;
-
-  if (postRow.user_id !== user.id) {
+  if (post.user_id !== user.id) {
     throw new AppError(message.UNAUTHORIZED, statusCode.UNAUTHORIZED);
   }
 
@@ -127,36 +125,47 @@ export const deletePostService = async (
 };
 
 // -----------------------------------------Post paggination-----------------------------------
-export const getPaginatedPost
-  = async (page: number, limit: number) => {
+export const getPaginatedPostService = async (
+  limit: number,
+  lastCreatedAt?: Date,
+  commentFlag?: boolean
+) => {
+  const whereCondition = lastCreatedAt
+    ? {
+      createdAt: {
+        [Op.lt]: lastCreatedAt,
+      },
+    }
 
-    // const page = Math.max(parseInt(req.query.page as string) || 1, 1);
-    // const limit = Math.max(parseInt(req.query.limit as string) || 10, 1);
-    const offset = (page - 1) * limit;
+    : {};
 
-    const { count, rows } = await Post.findAndCountAll({
-      limit,
-      offset,
-      order: [["createdAt", "DESC"]],
-      attributes: { exclude: ["id", "user_id"] },
-      include: [
-        {
-          model: User,
-          as: "UserInfo",
-          attributes: ["user_name", "email"],
-        },
-        {
-          model: Comment,
-          attributes: { exclude: ["id", "user_id", "post_id", "is_guest"] },
-        },
-      ],
+  const includeOptions: Includeable[] = [
+    {
+      model: User,
+      as: "UserInfo",
+      attributes: ["user_name", "email"],
+    },
+  ];
+
+  if (commentFlag) {
+    includeOptions.push({
+      model: Comment,
+      separate: true,
+      attributes: { exclude: ["user_id", "post_id", "is_guest"] },
     });
-
-    return {
-      totalUsers: count,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
-      users: rows,
-    };
-
   }
+
+  const posts = await Post.findAll({
+    where: whereCondition,
+    order: [["createdAt", "DESC"]],
+    limit,
+    include: includeOptions,
+  });
+
+  const lastPost = posts[posts.length - 1];
+  const nextCursor = lastPost?.createdAt ?? null;
+  return {
+    data: posts,
+    nextCursor,
+  };
+};

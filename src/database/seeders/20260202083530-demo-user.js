@@ -1,6 +1,7 @@
 'use strict';
 
-import bcrypt from 'bcrypt'
+
+const bcrypt = require('bcrypt');
 
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -11,10 +12,11 @@ module.exports = {
 
     for (let i = 51; i <= 150; i++) {
       users.push({
-        user_name: `demo_user_${i}`,
-        email: `demo${i}@example.com`,
+        user_name: `dummy_user_${i}`,
+        email: `demo${i}@gmail.com`,
         password: hashedPassword,
         role: "user",
+        age:Math.floor(Math.random() * 30) + 1,
         created_at: new Date(),
         updated_at: new Date(),
       });

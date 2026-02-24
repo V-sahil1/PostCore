@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import passport from "passport";
-import type { User } from "../database/models/user";
+import type { User } from "../database/models/user-model";
 
 interface AuthInfo {
   message: string;
