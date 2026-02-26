@@ -27,7 +27,7 @@ export const deleteUserService = async (
     throw new AppError(message.NOT_FOUND("User"), statusCode.NOT_FOUND);
   }
 
-  if (authUser.id !== targetUserId && authUser.role !== "admin") {
+  if (authUser.id !== targetUserId && authUser.role !== USER_ROLES.ADMIN) {
     throw new AppError(message.UNAUTHORIZED, statusCode.UNAUTHORIZED);
   }
 

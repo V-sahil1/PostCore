@@ -3,6 +3,7 @@ import { creatPost, postDelete, updatePost, pagginationPost, getPostById } from 
 import { authenticateJWT } from "../middleware/jwt";
 import { createpostSchema } from "../validator/joi";
 import validate from "../middleware/validateSchema";
+import { redisRateLimiter } from "../middleware/ratelimiter";
 // import { getPaginatedPost } from "../service/post.service";
 
 const router = Router();
@@ -11,7 +12,7 @@ router.get('/', pagginationPost)
 
 router.post('/', authenticateJWT, validate(createpostSchema), creatPost);
 //-------------------------------------------------------------------get post
-router.get('/:postId', getPostById)
+router.get('/:postId', redisRateLimiter, getPostById)
 
 router.patch('/:postId', authenticateJWT, updatePost)
 

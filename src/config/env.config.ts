@@ -44,6 +44,13 @@ export const env = {
 
   LOG: {
     FILE_LOGGER: getEnvValue("FILE_LOGGER"),
+  },
+  REDIS: {
+    REDIS_HOST: getEnvValue("REDIS_HOST"),
+    REDIS_PASSWORD: getEnvValue("REDIS_PASSWORD"),
+    REDIS_PORT: getEnvValue("REDIS_PORT"),
+    REQUEST_TIME: getEnvValue('REQUEST_TIME'),
+    RATE_LIMITER: getEnvValue("RATE_LIMITER")
 
   }
 

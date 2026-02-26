@@ -10,17 +10,16 @@ module.exports = {
 
     const users = [];
 
-    for (let i = 51; i <= 150; i++) {
+    // for (let i = 51; i <= 150; i++) {
       users.push({
-        user_name: `dummy_user_${i}`,
-        email: `demo${i}@gmail.com`,
+        user_name: `sahil_vardekar_01`,
+        email: `sahil5@gmail.com`,
         password: hashedPassword,
-        role: "user",
+        role: "Admin",
         age:Math.floor(Math.random() * 30) + 1,
         created_at: new Date(),
         updated_at: new Date(),
       });
-    }
 
     return queryInterface.bulkInsert('users', users);
   },

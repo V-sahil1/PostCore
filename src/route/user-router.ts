@@ -5,6 +5,7 @@ import { deleteUser, getPaginated, getUser, getUserPostsWithComments, updateUser
 import { authenticateJWT } from "../middleware/jwt";
 import { updateSchema } from "../validator/joi";
 import validate from "../middleware/validateSchema";
+import { redisRateLimiter } from "../middleware/ratelimiter";
 
 // import {  } from "../../controller/route";
 
@@ -15,11 +16,12 @@ router.get(
 );
 // getPaginated
 router.get(
-  "/", authenticateJWT, getPaginated
+  "/",
+  authenticateJWT, getPaginated
 );
 
 router.get(
-  "/:userId", authenticateJWT, getUser
+  "/:userId", redisRateLimiter, authenticateJWT, getUser
 );
 
 router.delete('/:userId', authenticateJWT, deleteUser);

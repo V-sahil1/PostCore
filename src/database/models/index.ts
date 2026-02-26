@@ -8,7 +8,7 @@ import { Sequelize, DataTypes } from "sequelize";
 import { configs } from "../../config/sql";
 import { env } from "../../config/env.config";
 import type { User } from "./user-model";
-import type { Post } from "./post.-model";
+import type { Post } from "./post-model";
 import type { Token } from "./token-model";
 import type { Comment } from "./comment-model";
 
@@ -28,8 +28,8 @@ interface DB {
   sequelize: Sequelize;
   user: ModelStatic<User>;
   post: ModelStatic<Post>;
-   token: ModelStatic<Token>;
-   commment: ModelStatic<Comment>;
+  token: ModelStatic<Token>;
+  commment: ModelStatic<Comment>;
   Sequelize: typeof Sequelize;
 }
 

@@ -2,11 +2,10 @@ import type { Request, Response } from "express";
 import * as userService from "../service/user.service";
 import { SUCCESSMESSAGES, operationDelete, oprationUpdate, ERRORS, globalErrorHandler } from "../const/message";
 import { env } from "../config/env.config";
-
 import { sendSuccess } from "../utils/response.util";
 import { AppError } from "../utils/errorHandler";
 import type { AuthUser } from "../Interface/type";
-
+import { redis } from "../config/redis";
 // ----------------------------------------TYPES ----------------------------------------------
 // type AuthUser = {
 //   id: number;
@@ -56,16 +55,28 @@ export const getUser = async (
   try {
     const authUser = req.user as AuthUser;
     const userId = Number(req.params.userId);
+    const cacheKey = `user:${authUser.id}`;
+
+    const cachedUser = await redis.get(cacheKey);
+
+    if (cachedUser) {
+      return sendSuccess(
+        res,
+        200,
+        "User Data Fetched Successfully! (From Cache)",
+        JSON.parse(cachedUser)
+      );
+    }
 
     const result = await userService.getAllUserService(userId, authUser);
-    console.log(result);
+
+    await redis.set(cacheKey, JSON.stringify(result), "EX", env.REDIS.REQUEST_TIME);
 
     return sendSuccess(
       res,
-      SUCCESSMESSAGES.STATUS_CODE.SUCCESS,
-      SUCCESSMESSAGES.SUCCESS,
-      result,
-
+      200,
+      "User Data Fetched Successfully!",
+      result
     );
 
   } catch (error: unknown) {

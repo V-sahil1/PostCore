@@ -5,6 +5,7 @@ import { AppError } from "../utils/errorHandler";
 import { User } from "../database/models/user-model";
 import { USER_ROLES } from "../const/enum";
 import type { AuthUser } from "../Interface/type";
+// import { commentQueue } from "../queues/comment.queue";
 const Comment = db.comment;
 const Post = db.post;
 
@@ -38,6 +39,11 @@ export const createCommentService = async (
     is_guest: !user,
     post_id: postId,
   });
+  // await commentQueue.add("process-comment", {
+  //   postId: comment.post_id,
+  //   userId: comment.user_id,
+  // });
+
   const commentData = comment.toJSON();
 
   const { _id, _user_id, _post_id, _is_guest, ...cleanPost } = commentData;
@@ -60,7 +66,7 @@ export const deleteCommentService = async (
 
   const commentRow = comment as unknown as CommentRow;
 
-  if (commentRow.user_id !== user.id && user.role !== "admin") {
+  if (commentRow.user_id !== user.id && user.role !== USER_ROLES.ADMIN) {
     throw new AppError(message.UNAUTHORIZED, statusCode.UNAUTHORIZED);
   }
 

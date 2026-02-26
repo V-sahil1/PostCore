@@ -4,6 +4,8 @@ import { SUCCESSMESSAGES, operationCreate, operationDelete, oprationUpdate, ERRO
 import { sendSuccess } from "../utils/response.util";
 import { AppError } from "../utils/errorHandler";
 import type { AuthUser } from "../Interface/type";
+import { redis } from "../config/redis";
+import { env } from "../config/env.config";
 
 const message = ERRORS.MESSAGES
 const statusCode = ERRORS.STATUS_CODE
@@ -68,7 +70,20 @@ export const getPostById = async (
 ): Promise<Response | void> => {
   try {
     const id = Number(req.params.postId);
+    const cacheKey = `Post:${id}`
+    const cachedUser = await redis.get(cacheKey);
+
+    if (cachedUser) {
+      return sendSuccess(
+        res,
+        200,
+        "Post Data Fetched Successfully! (From Cache)",
+        JSON.parse(cachedUser)
+      );
+    }
+
     const data = await postService.getPostByIdService(id);
+    await redis.set(cacheKey, JSON.stringify(data), "EX", env.REDIS.REQUEST_TIME);
     return sendSuccess(
       res,
       SUCCESSMESSAGES.STATUS_CODE.SUCCESS,
